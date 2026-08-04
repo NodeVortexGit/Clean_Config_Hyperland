@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import Quickshell.Services.UPower
 import Caelestia.Config
 import qs.services
@@ -175,5 +176,17 @@ Singleton {
         }
 
         target: UPower.displayDevice
+    }
+
+    IpcHandler {
+        function toggle(): void {
+            root.toggleFullyExpanded();
+        }
+
+        function collapse(): void {
+            root.collapse();
+        }
+
+        target: "island"
     }
 }
