@@ -28,6 +28,12 @@ Item {
     readonly property BarPopouts.PopoutState popoutState: BarPopouts.PopoutState {}
     readonly property DashboardState dashState: DashboardState {}
 
+    // GalaxyBudsClient exposes ~23 raw actions; only surface the handful that
+    // are actually useful as quick-toggle buttons (modes/voice detection/
+    // gestures), not the full raw CLI action list.
+    readonly property var curatedBudsActionIds: ["AncToggle", "AmbientToggle", "SwitchAncSensitivity", "ToggleConversationDetect", "ToggleDoubleEdgeTouch", "LockTouchpadToggle", "StartStopFind"]
+    readonly property var curatedBudsActions: GalaxyBuds.actions.filter(a => root.curatedBudsActionIds.includes(a.id))
+
     Component.onCompleted: GalaxyBuds.polling = true
     Component.onDestruction: GalaxyBuds.polling = false
 
@@ -157,7 +163,6 @@ Item {
 
             FixedCard {
                 Layout.row: 1
-                Layout.rowSpan: 2
                 Layout.column: 0
                 Layout.fillWidth: true
                 Layout.fillHeight: true
@@ -170,7 +175,6 @@ Item {
 
             FixedCard {
                 Layout.row: 1
-                Layout.rowSpan: 2
                 Layout.column: 1
                 Layout.fillWidth: true
                 Layout.fillHeight: true
@@ -184,45 +188,45 @@ Item {
                 Layout.row: 1
                 Layout.column: 2
                 Layout.fillWidth: true
-
-                RowLayout {
-                    spacing: Tokens.spacing.large
-
-                    QuickToggle {
-                        icon: "do_not_disturb_on"
-                        label: qsTr("Focus")
-                        checked: Notifs.dnd
-                        onToggled: Notifs.dnd = !Notifs.dnd
-                    }
-
-                    QuickToggle {
-                        icon: "airplanemode_active"
-                        label: qsTr("Airplane")
-                        checked: Airplane.enabled
-                        onToggled: Airplane.toggle()
-                    }
-                }
-            }
-
-            Card {
-                Layout.row: 2
-                Layout.column: 2
-                Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                RowLayout {
-                    spacing: Tokens.spacing.extraLarge
+                ColumnLayout {
+                    spacing: Tokens.spacing.large
 
-                    BarComponents.IslandWorkspaces {}
+                    RowLayout {
+                        Layout.alignment: Qt.AlignHCenter
+                        spacing: Tokens.spacing.large
 
-                    BarComponents.IslandTimerControls {}
+                        QuickToggle {
+                            icon: "do_not_disturb_on"
+                            label: qsTr("Focus")
+                            checked: Notifs.dnd
+                            onToggled: Notifs.dnd = !Notifs.dnd
+                        }
+
+                        QuickToggle {
+                            icon: "airplanemode_active"
+                            label: qsTr("Airplane")
+                            checked: Airplane.enabled
+                            onToggled: Airplane.toggle()
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.alignment: Qt.AlignHCenter
+                        spacing: Tokens.spacing.extraLarge
+
+                        BarComponents.IslandWorkspaces {}
+
+                        BarComponents.IslandTimerControls {}
+                    }
                 }
             }
 
             StyledRect {
                 id: calendarCard
 
-                Layout.row: 3
+                Layout.row: 2
                 Layout.column: 0
                 Layout.fillWidth: true
                 implicitHeight: calendar.implicitHeight + Tokens.padding.large * 2
@@ -241,13 +245,13 @@ Item {
             }
 
             Loader {
-                Layout.row: 3
+                Layout.row: 2
                 Layout.column: 1
                 Layout.fillWidth: true
-                active: GalaxyBuds.connected
+                active: GalaxyBuds.connected && root.curatedBudsActions.length > 0
                 visible: active
 
-                sourceComponent: Card {
+                sourceComponent: FixedCard {
                     ColumnLayout {
                         spacing: Tokens.spacing.small
 
@@ -259,17 +263,17 @@ Item {
                             }
 
                             StyledText {
-                                text: qsTr("Galaxy Buds connected")
+                                text: qsTr("Galaxy Buds")
                                 font: Tokens.font.body.small
                             }
                         }
 
                         Flow {
-                            Layout.preferredWidth: 400
+                            Layout.preferredWidth: 300
                             spacing: Tokens.spacing.small
 
                             Repeater {
-                                model: GalaxyBuds.actions
+                                model: root.curatedBudsActions
 
                                 Item {
                                     id: actionBtn
@@ -302,7 +306,7 @@ Item {
             }
 
             BarComponents.Power {
-                Layout.row: 3
+                Layout.row: 2
                 Layout.column: 2
                 Layout.alignment: Qt.AlignHCenter
                 visibilities: root.visibilities
