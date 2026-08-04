@@ -32,6 +32,14 @@ Singleton {
         }
     }
 
+    // Only poll while something is actually asking (the quick-settings panel).
+    // Polling unconditionally in the background was spawning a full flatpak
+    // sandbox every few seconds forever, and re-triggering the timer without
+    // checking whether the previous call had finished could kill and restart
+    // it mid-flight - real, continuous system load unrelated to whether
+    // anyone was even looking at the panel.
+    property bool polling: false
+
     Process {
         id: deviceProc
 
@@ -77,24 +85,22 @@ Singleton {
     }
 
     Timer {
-        interval: 5000
-        running: true
+        interval: 8000
+        running: root.polling
         repeat: true
         triggeredOnStart: true
-        onTriggered: {
-            deviceProc.running = false;
-            deviceProc.running = true;
-        }
+        // Skip the tick entirely if the previous call is still running instead
+        // of killing and respawning it.
+        onTriggered: if (!deviceProc.running)
+            deviceProc.running = true
     }
 
     Timer {
-        interval: 15000
-        running: true
+        interval: 20000
+        running: root.polling
         repeat: true
         triggeredOnStart: true
-        onTriggered: {
-            actionsProc.running = false;
-            actionsProc.running = true;
-        }
+        onTriggered: if (!actionsProc.running)
+            actionsProc.running = true
     }
 }

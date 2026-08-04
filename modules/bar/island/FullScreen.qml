@@ -28,9 +28,13 @@ Item {
     readonly property BarPopouts.PopoutState popoutState: BarPopouts.PopoutState {}
     readonly property DashboardState dashState: DashboardState {}
 
+    Component.onCompleted: GalaxyBuds.polling = true
+    Component.onDestruction: GalaxyBuds.polling = false
+
     Loader {
         anchors.fill: parent
         active: root.showMedia
+        asynchronous: true
         visible: active
         sourceComponent: ColumnLayout {
             anchors.fill: parent
@@ -117,6 +121,7 @@ Item {
     Loader {
         anchors.fill: parent
         active: !root.showMedia
+        asynchronous: true
         visible: active
         sourceComponent: Flickable {
             anchors.fill: parent
@@ -161,15 +166,23 @@ Item {
                     spacing: Tokens.spacing.large
 
                     Card {
-                        BarPopouts.Network {
-                            popouts: root.popoutState
-                            view: "wireless"
+                        Loader {
+                            asynchronous: true
+                            active: true
+                            sourceComponent: BarPopouts.Network {
+                                popouts: root.popoutState
+                                view: "wireless"
+                            }
                         }
                     }
 
                     Card {
-                        BarPopouts.Bluetooth {
-                            popouts: root.popoutState
+                        Loader {
+                            asynchronous: true
+                            active: true
+                            sourceComponent: BarPopouts.Bluetooth {
+                                popouts: root.popoutState
+                            }
                         }
                     }
                 }
