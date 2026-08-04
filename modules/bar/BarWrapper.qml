@@ -38,16 +38,15 @@ Item {
 
     clip: false
     visible: implicitWidth > 0 && implicitHeight > 0
+    // No Behavior here: the pill inside Bar.qml already animates its own
+    // implicitWidth/Height smoothly. Animating this too would double up
+    // (two independent animations chasing each other on the same value),
+    // and on a big compact-to-expanded jump the compounded easing could
+    // transiently produce a non-positive size here, which - since `visible`
+    // below gates on implicitWidth/Height > 0 - would blank out the entire
+    // bar including the pill until it settled.
     implicitWidth: shouldBeVisible ? (content.item?.implicitWidth ?? compactHeight) : 0
     implicitHeight: shouldBeVisible ? (content.item?.implicitHeight ?? compactHeight) : 0
-
-    Behavior on implicitWidth {
-        Anim {}
-    }
-
-    Behavior on implicitHeight {
-        Anim {}
-    }
 
     Loader {
         id: content
