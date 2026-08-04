@@ -187,6 +187,7 @@ Item {
         // of whatever content is inside, so there's never a state where the only
         // way out is finding empty space to tap in a busy panel.
         StateLayer {
+            anchors.fill: undefined
             anchors.top: parent.top
             anchors.right: parent.right
             anchors.margins: Tokens.padding.large

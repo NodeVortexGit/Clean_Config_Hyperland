@@ -52,11 +52,18 @@ Item {
                     Layout.fillWidth: true
                 }
 
-                StateLayer {
-                    implicitWidth: implicitHeight
+                Item {
+                    implicitWidth: settingsIcon.implicitHeight + Tokens.padding.small
                     implicitHeight: settingsIcon.implicitHeight + Tokens.padding.small
-                    radius: Tokens.rounding.full
-                    onClicked: Island.showSettingsPage()
+
+                    StateLayer {
+                        anchors.fill: undefined
+                        anchors.centerIn: parent
+                        implicitWidth: parent.implicitWidth
+                        implicitHeight: parent.implicitHeight
+                        radius: Tokens.rounding.full
+                        onClicked: Island.showSettingsPage()
+                    }
 
                     MaterialIcon {
                         id: settingsIcon
