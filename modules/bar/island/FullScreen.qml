@@ -1,12 +1,14 @@
 pragma ComponentBehavior: Bound
 
 import "../components" as BarComponents
+import "../popouts" as BarPopouts
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Bluetooth
 import Caelestia.Config
 import qs.components
 import qs.components.widgets as Widgets
+import qs.modules.dashboard.dash as DashCards
 import qs.modules.dashboard.media as DashMedia
 import qs.services
 
@@ -15,26 +17,74 @@ Item {
 
     required property DrawerVisibilities visibilities
 
-    readonly property bool showMedia: Players.active?.isPlaying ?? false
+    readonly property bool showMedia: (Players.active?.isPlaying ?? false) && !Island.forceSettingsPage
 
-    focus: true
-    Keys.onEscapePressed: Island.collapse()
-    Component.onCompleted: forceActiveFocus()
+    // Shared with the embedded Network/Bluetooth popout panels, which need one
+    // to run at all but don't need the full old bar popout-stack machinery.
+    readonly property BarPopouts.PopoutState popoutState: BarPopouts.PopoutState {}
+    readonly property DashboardState dashState: DashboardState {}
 
     Loader {
         anchors.fill: parent
         active: root.showMedia
         visible: active
-        sourceComponent: RowLayout {
-            spacing: Tokens.spacing.extraLarge
+        sourceComponent: ColumnLayout {
+            spacing: Tokens.spacing.medium
 
-            Widgets.CoverArt {
-                Layout.preferredWidth: Tokens.sizes.dashboard.mediaCoverArtSize * 0.7
-                Layout.preferredHeight: Tokens.sizes.dashboard.mediaCoverArtSize * 0.7
+            RowLayout {
+                Layout.fillWidth: true
+
+                Item {
+                    Layout.fillWidth: true
+                }
+
+                StateLayer {
+                    implicitWidth: implicitHeight
+                    implicitHeight: settingsIcon.implicitHeight + Tokens.padding.small
+                    radius: Tokens.rounding.full
+                    onClicked: Island.showSettingsPage()
+
+                    MaterialIcon {
+                        id: settingsIcon
+                        anchors.centerIn: parent
+                        text: "tune"
+                    }
+                }
             }
 
-            DashMedia.Details {
+            RowLayout {
                 Layout.fillWidth: true
+                Layout.fillHeight: true
+                spacing: Tokens.spacing.extraLarge
+
+                ColumnLayout {
+                    Layout.preferredWidth: parent.width * 0.32
+                    Layout.fillHeight: true
+                    spacing: Tokens.spacing.large
+
+                    Item {
+                        Layout.fillHeight: true
+                    }
+
+                    Widgets.CoverArt {
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.preferredWidth: 220
+                        Layout.preferredHeight: 220
+                    }
+
+                    DashMedia.Details {
+                        Layout.fillWidth: true
+                    }
+
+                    Item {
+                        Layout.fillHeight: true
+                    }
+                }
+
+                DashMedia.LyricsAndSelector {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                }
             }
         }
     }
@@ -43,102 +93,186 @@ Item {
         anchors.fill: parent
         active: !root.showMedia
         visible: active
-        sourceComponent: ColumnLayout {
-            spacing: Tokens.spacing.large
+        sourceComponent: Flickable {
+            contentWidth: width
+            contentHeight: grid.implicitHeight
+            clip: true
 
-            RowLayout {
-                Layout.alignment: Qt.AlignHCenter
+            ColumnLayout {
+                id: grid
+
+                width: parent.width
                 spacing: Tokens.spacing.large
 
-                QuickToggle {
-                    icon: "wifi"
-                    label: qsTr("Wi-Fi")
-                    checked: Network.wifiEnabled
-                    onToggled: Network.toggleWifi()
-                }
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter
+                    spacing: Tokens.spacing.large
 
-                QuickToggle {
-                    icon: Bluetooth.defaultAdapter?.enabled ? "bluetooth" : "bluetooth_disabled"
-                    label: qsTr("Bluetooth")
-                    checked: Bluetooth.defaultAdapter?.enabled ?? false
-                    onToggled: {
-                        const adapter = Bluetooth.defaultAdapter;
-                        if (adapter)
-                            adapter.enabled = !adapter.enabled;
+                    StyledRect {
+                        implicitWidth: Tokens.sizes.dashboard.dateTimeWidth + Tokens.padding.large * 2
+                        implicitHeight: 140
+                        radius: Tokens.rounding.large
+                        color: Colours.tPalette.m3surfaceContainerHigh
+
+                        DashCards.DateTime {
+                            anchors.fill: parent
+                        }
+                    }
+
+                    Card {
+                        DashCards.SmallWeather {}
+                    }
+
+                    Card {
+                        BarPopouts.Battery {}
                     }
                 }
 
-                QuickToggle {
-                    icon: "do_not_disturb_on"
-                    label: qsTr("Focus")
-                    checked: Notifs.dnd
-                    onToggled: Notifs.dnd = !Notifs.dnd
-                }
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter
+                    spacing: Tokens.spacing.large
 
-                QuickToggle {
-                    icon: "airplanemode_active"
-                    label: qsTr("Airplane")
-                    checked: Airplane.enabled
-                    onToggled: Airplane.toggle()
-                }
-            }
-
-            RowLayout {
-                Layout.alignment: Qt.AlignHCenter
-                spacing: Tokens.spacing.extraLarge
-
-                BarComponents.IslandWorkspaces {}
-
-                BarComponents.IslandTimerControls {}
-            }
-
-            Loader {
-                Layout.alignment: Qt.AlignHCenter
-                active: GalaxyBuds.connected
-                visible: active
-
-                sourceComponent: RowLayout {
-                    spacing: Tokens.spacing.small
-
-                    MaterialIcon {
-                        text: "headset"
+                    Card {
+                        BarPopouts.Network {
+                            popouts: root.popoutState
+                            view: "wireless"
+                        }
                     }
 
-                    StyledText {
-                        text: qsTr("Galaxy Buds connected")
-                        font: Tokens.font.body.small
+                    Card {
+                        BarPopouts.Bluetooth {
+                            popouts: root.popoutState
+                        }
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter
+                    spacing: Tokens.spacing.large
+
+                    Card {
+                        RowLayout {
+                            spacing: Tokens.spacing.large
+
+                            QuickToggle {
+                                icon: "do_not_disturb_on"
+                                label: qsTr("Focus")
+                                checked: Notifs.dnd
+                                onToggled: Notifs.dnd = !Notifs.dnd
+                            }
+
+                            QuickToggle {
+                                icon: "airplanemode_active"
+                                label: qsTr("Airplane")
+                                checked: Airplane.enabled
+                                onToggled: Airplane.toggle()
+                            }
+                        }
                     }
 
-                    Repeater {
-                        model: GalaxyBuds.actions
+                    Card {
+                        RowLayout {
+                            spacing: Tokens.spacing.extraLarge
 
-                        StateLayer {
-                            required property var modelData
+                            BarComponents.IslandWorkspaces {}
 
-                            implicitWidth: label.implicitWidth + Tokens.padding.medium
-                            implicitHeight: label.implicitHeight + Tokens.padding.small
-                            radius: Tokens.rounding.full
-                            onClicked: GalaxyBuds.execute(modelData.id)
+                            BarComponents.IslandTimerControls {}
+                        }
+                    }
+                }
+
+                StyledRect {
+                    id: calendarCard
+
+                    Layout.alignment: Qt.AlignHCenter
+                    implicitWidth: 400 + Tokens.padding.large * 2
+                    implicitHeight: calendar.implicitHeight + Tokens.padding.large * 2
+                    radius: Tokens.rounding.large
+                    color: Colours.tPalette.m3surfaceContainerHigh
+
+                    DashCards.Calendar {
+                        id: calendar
+
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.margins: Tokens.padding.large
+                        dashState: root.dashState
+                    }
+                }
+
+                Loader {
+                    Layout.alignment: Qt.AlignHCenter
+                    active: GalaxyBuds.connected
+                    visible: active
+
+                    sourceComponent: Card {
+                        RowLayout {
+                            spacing: Tokens.spacing.small
+
+                            MaterialIcon {
+                                text: "headset"
+                            }
 
                             StyledText {
-                                id: label
-                                anchors.centerIn: parent
-                                text: modelData.name
+                                text: qsTr("Galaxy Buds connected")
                                 font: Tokens.font.body.small
+                            }
+
+                            Repeater {
+                                model: GalaxyBuds.actions
+
+                                StateLayer {
+                                    required property var modelData
+
+                                    implicitWidth: label.implicitWidth + Tokens.padding.medium
+                                    implicitHeight: label.implicitHeight + Tokens.padding.small
+                                    radius: Tokens.rounding.full
+                                    onClicked: GalaxyBuds.execute(modelData.id)
+
+                                    StyledText {
+                                        id: label
+                                        anchors.centerIn: parent
+                                        text: modelData.name
+                                        font: Tokens.font.body.small
+                                    }
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            Item {
-                Layout.fillHeight: true
+                BarComponents.Power {
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.topMargin: Tokens.spacing.medium
+                    Layout.bottomMargin: Tokens.spacing.medium
+                    visibilities: root.visibilities
+                }
             }
+        }
+    }
 
-            BarComponents.Power {
-                Layout.alignment: Qt.AlignHCenter
-                visibilities: root.visibilities
-            }
+    focus: true
+    Keys.onEscapePressed: Island.collapse()
+    Component.onCompleted: forceActiveFocus()
+
+    component Card: StyledRect {
+        default property alias content: inner.data
+
+        Layout.alignment: Qt.AlignTop
+        implicitWidth: inner.implicitWidth + Tokens.padding.large * 2
+        implicitHeight: inner.implicitHeight + Tokens.padding.large * 2
+        radius: Tokens.rounding.large
+        color: Colours.tPalette.m3surfaceContainerHigh
+
+        Item {
+            id: inner
+            anchors.centerIn: parent
+            implicitWidth: childrenRect.width
+            implicitHeight: childrenRect.height
         }
     }
 
@@ -156,7 +290,7 @@ Item {
         StyledRect {
             anchors.fill: parent
             radius: Tokens.rounding.large
-            color: toggle.checked ? Colours.palette.m3primaryContainer : Colours.tPalette.m3surfaceContainerHigh
+            color: toggle.checked ? Colours.palette.m3primaryContainer : Colours.tPalette.m3surfaceContainerHighest
 
             Behavior on color {
                 CAnim {}

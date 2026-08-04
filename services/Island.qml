@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
+import Quickshell.Services.UPower
 import Caelestia.Config
 import qs.services
 
@@ -16,10 +17,15 @@ Singleton {
 
     readonly property Brightness.Monitor brightnessMonitor: Brightness.getMonitor("active")
 
+    property bool lowBatteryWarned: false
+
     // Transient overlays win over the resting mode, then time out back to it
     property string transientMode: ""
     // Full-screen quick-settings / media takeover, toggled by tapping the pill
     property bool fullyExpanded: false
+    // While fullyExpanded and music is playing, the default page is "media";
+    // this lets the user explicitly ask for the quick-settings grid instead.
+    property bool forceSettingsPage: false
 
     readonly property string mode: transientMode !== "" ? transientMode : restingMode
     readonly property bool expanded: transientMode !== "" || fullyExpanded
@@ -54,14 +60,39 @@ Singleton {
         transientTimer.restart();
     }
 
+    function flashCharging(): void {
+        transientMode = "charging";
+        transientTimer.interval = 3000;
+        transientTimer.restart();
+    }
+
+    function flashLowBattery(): void {
+        transientMode = "lowbattery";
+        transientTimer.interval = 4000;
+        transientTimer.restart();
+    }
+
     function toggleFullyExpanded(): void {
-        if (transientMode !== "")
-            return;
-        fullyExpanded = !fullyExpanded;
+        // A tap always means "I want to interact now" - drop whatever transient
+        // is showing (a stuck/repeating transient must never make the island
+        // permanently untappable) and open/close the full expansion.
+        transientTimer.stop();
+        transientMode = "";
+        if (fullyExpanded) {
+            fullyExpanded = false;
+        } else {
+            forceSettingsPage = false;
+            fullyExpanded = true;
+        }
+    }
+
+    function showSettingsPage(): void {
+        forceSettingsPage = true;
     }
 
     function collapse(): void {
         fullyExpanded = false;
+        forceSettingsPage = false;
     }
 
     function dismissTransient(): void {
@@ -121,5 +152,28 @@ Singleton {
         }
 
         target: root.brightnessMonitor
+    }
+
+    Connections {
+        function onOnBatteryChanged(): void {
+            if (!UPower.onBattery)
+                root.flashCharging();
+        }
+
+        target: UPower
+    }
+
+    Connections {
+        function onPercentageChanged(): void {
+            const pct = UPower.displayDevice.percentage;
+            if (UPower.onBattery && pct <= 0.2 && !root.lowBatteryWarned) {
+                root.lowBatteryWarned = true;
+                root.flashLowBattery();
+            } else if (pct > 0.3 || !UPower.onBattery) {
+                root.lowBatteryWarned = false;
+            }
+        }
+
+        target: UPower.displayDevice
     }
 }

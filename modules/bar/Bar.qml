@@ -5,6 +5,7 @@ import "island" as Island_
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Services.UPower
 import Caelestia.Config
 import qs.components
 import qs.services
@@ -49,9 +50,10 @@ Item {
         } else if (mode === "notification") {
             root.visibilities.sidebar = true;
             Island.dismissTransient();
-        } else if (mode === "workspace" || mode === "volume" || mode === "brightness") {
-            // let it revert on its own
         } else {
+            // A tap always means "let me in" - Island.toggleFullyExpanded()
+            // drops any stuck/looping transient before opening, so the pill
+            // can never become permanently untappable.
             Island.toggleFullyExpanded();
         }
     }
@@ -144,6 +146,10 @@ Item {
                         return volumeView;
                     if (root.mode === "brightness")
                         return brightnessView;
+                    if (root.mode === "charging")
+                        return chargingView;
+                    if (root.mode === "lowbattery")
+                        return lowBatteryView;
                     if (root.mode === "timer")
                         return timerView;
                     if (root.mode === "music")
@@ -283,6 +289,43 @@ Item {
                         Anim {}
                     }
                 }
+            }
+        }
+    }
+
+    Component {
+        id: chargingView
+
+        RowLayout {
+            spacing: Tokens.spacing.small
+
+            MaterialIcon {
+                text: "bolt"
+                color: Colours.palette.m3primary
+            }
+
+            StyledText {
+                text: qsTr("Charging – %1%").arg(Math.round(UPower.displayDevice.percentage * 100))
+                font: Tokens.font.body.medium
+            }
+        }
+    }
+
+    Component {
+        id: lowBatteryView
+
+        RowLayout {
+            spacing: Tokens.spacing.small
+
+            MaterialIcon {
+                text: "battery_alert"
+                color: Colours.palette.m3error
+            }
+
+            StyledText {
+                text: qsTr("Low battery – %1%").arg(Math.round(UPower.displayDevice.percentage * 100))
+                font: Tokens.font.body.medium
+                color: Colours.palette.m3error
             }
         }
     }

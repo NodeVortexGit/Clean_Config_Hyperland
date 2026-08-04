@@ -275,6 +275,7 @@ StyledWindow {
             id: bar
 
             anchors.top: parent.top
+            anchors.topMargin: Tokens.padding.extraLargeIncreased
             anchors.horizontalCenter: parent.horizontalCenter
 
             screen: root.screen
