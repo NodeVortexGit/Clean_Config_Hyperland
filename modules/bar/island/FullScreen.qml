@@ -34,7 +34,6 @@ Item {
     Loader {
         anchors.fill: parent
         active: root.showMedia
-        asynchronous: true
         visible: active
         sourceComponent: ColumnLayout {
             anchors.fill: parent
@@ -121,7 +120,6 @@ Item {
     Loader {
         anchors.fill: parent
         active: !root.showMedia
-        asynchronous: true
         visible: active
         sourceComponent: Flickable {
             anchors.fill: parent
@@ -166,23 +164,15 @@ Item {
                     spacing: Tokens.spacing.large
 
                     Card {
-                        Loader {
-                            asynchronous: true
-                            active: true
-                            sourceComponent: BarPopouts.Network {
-                                popouts: root.popoutState
-                                view: "wireless"
-                            }
+                        BarPopouts.Network {
+                            popouts: root.popoutState
+                            view: "wireless"
                         }
                     }
 
                     Card {
-                        Loader {
-                            asynchronous: true
-                            active: true
-                            sourceComponent: BarPopouts.Bluetooth {
-                                popouts: root.popoutState
-                            }
+                        BarPopouts.Bluetooth {
+                            popouts: root.popoutState
                         }
                     }
                 }
