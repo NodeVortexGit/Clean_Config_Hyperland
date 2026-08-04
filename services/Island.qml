@@ -79,6 +79,17 @@ Singleton {
         transientTimer.restart();
     }
 
+    property string hotplugMessage: ""
+
+    function flashHotplug(message: string): void {
+        if (transientMode === "notification")
+            return;
+        hotplugMessage = message;
+        transientMode = "hotplug";
+        transientTimer.interval = 3000;
+        transientTimer.restart();
+    }
+
     function toggleFullyExpanded(): void {
         // A tap always means "I want to interact now" - drop whatever transient
         // is showing (a stuck/repeating transient must never make the island

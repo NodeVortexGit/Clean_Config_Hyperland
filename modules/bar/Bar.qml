@@ -152,6 +152,8 @@ Item {
                         return unpluggedView;
                     if (root.mode === "lowbattery")
                         return lowBatteryView;
+                    if (root.mode === "hotplug")
+                        return hotplugView;
                     if (root.mode === "timer")
                         return timerView;
                     if (root.mode === "music")
@@ -367,6 +369,23 @@ Item {
                 text: qsTr("Low battery – %1%").arg(Math.round(UPower.displayDevice.percentage * 100))
                 font: Tokens.font.body.medium
                 color: Colours.palette.m3error
+            }
+        }
+    }
+
+    Component {
+        id: hotplugView
+
+        RowLayout {
+            spacing: Tokens.spacing.small
+
+            MaterialIcon {
+                text: "usb"
+            }
+
+            StyledText {
+                text: Island.hotplugMessage
+                font: Tokens.font.body.medium
             }
         }
     }

@@ -178,15 +178,39 @@ Item {
             }
 
             FixedCard {
+                id: networkCard
+
                 Layout.row: 1
                 Layout.column: 0
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 Layout.minimumWidth: 340
 
-                BarPopouts.Network {
-                    popouts: root.popoutState
-                    view: "wireless"
+                property string networkView: "wireless"
+
+                ColumnLayout {
+                    spacing: Tokens.spacing.small
+
+                    RowLayout {
+                        spacing: Tokens.spacing.small
+
+                        NetworkTab {
+                            label: qsTr("WiFi")
+                            active: networkCard.networkView === "wireless"
+                            onClicked: networkCard.networkView = "wireless"
+                        }
+
+                        NetworkTab {
+                            label: qsTr("Wired")
+                            active: networkCard.networkView === "ethernet"
+                            onClicked: networkCard.networkView = "ethernet"
+                        }
+                    }
+
+                    BarPopouts.Network {
+                        popouts: root.popoutState
+                        view: networkCard.networkView
+                    }
                 }
             }
 
@@ -329,6 +353,44 @@ Item {
                 Layout.alignment: Qt.AlignHCenter
                 visibilities: root.visibilities
             }
+        }
+    }
+
+    component NetworkTab: Item {
+        id: tab
+
+        required property string label
+        required property bool active
+        signal clicked
+
+        implicitWidth: tabLabel.implicitWidth + Tokens.padding.medium
+        implicitHeight: tabLabel.implicitHeight + Tokens.padding.small
+
+        StyledRect {
+            anchors.fill: parent
+            radius: Tokens.rounding.full
+            color: tab.active ? Colours.palette.m3primaryContainer : "transparent"
+
+            Behavior on color {
+                CAnim {}
+            }
+
+            StateLayer {
+                anchors.fill: undefined
+                anchors.centerIn: parent
+                implicitWidth: parent.implicitWidth
+                implicitHeight: parent.implicitHeight
+                radius: Tokens.rounding.full
+                onClicked: tab.clicked()
+            }
+        }
+
+        StyledText {
+            id: tabLabel
+            anchors.centerIn: parent
+            text: tab.label
+            font: Tokens.font.label.small
+            color: tab.active ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurfaceVariant
         }
     }
 

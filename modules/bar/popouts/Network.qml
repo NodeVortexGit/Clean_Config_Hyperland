@@ -28,7 +28,7 @@ ColumnLayout {
         Layout.preferredHeight: visible ? implicitHeight : 0
         Layout.topMargin: visible ? Tokens.padding.medium : 0
         Layout.rightMargin: Tokens.padding.extraSmall
-        text: qsTr("Wireless")
+        text: qsTr("WiFi")
         font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
     }
 
