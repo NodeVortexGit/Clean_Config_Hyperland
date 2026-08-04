@@ -7,13 +7,17 @@ import QtQuick.Layouts
 import Quickshell.Bluetooth
 import Caelestia.Config
 import qs.components
+import qs.components.controls
 import qs.components.widgets as Widgets
 import qs.modules.dashboard.dash as DashCards
 import qs.modules.dashboard.media as DashMedia
 import qs.services
+import qs.utils
 
 Item {
     id: root
+
+    anchors.fill: parent
 
     required property DrawerVisibilities visibilities
 
@@ -29,6 +33,7 @@ Item {
         active: root.showMedia
         visible: active
         sourceComponent: ColumnLayout {
+            anchors.fill: parent
             spacing: Tokens.spacing.medium
 
             RowLayout {
@@ -76,6 +81,22 @@ Item {
                         Layout.fillWidth: true
                     }
 
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Tokens.spacing.small
+
+                        MaterialIcon {
+                            text: Icons.getVolumeIcon(Audio.volume, Audio.muted)
+                        }
+
+                        StyledSlider {
+                            Layout.fillWidth: true
+                            value: Audio.volume
+                            interactionOnMove: true
+                            onInteraction: v => Audio.setVolume(v)
+                        }
+                    }
+
                     Item {
                         Layout.fillHeight: true
                     }
@@ -94,6 +115,7 @@ Item {
         active: !root.showMedia
         visible: active
         sourceComponent: Flickable {
+            anchors.fill: parent
             contentWidth: width
             contentHeight: grid.implicitHeight
             clip: true

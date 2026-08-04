@@ -148,6 +148,8 @@ Item {
                         return brightnessView;
                     if (root.mode === "charging")
                         return chargingView;
+                    if (root.mode === "unplugged")
+                        return unpluggedView;
                     if (root.mode === "lowbattery")
                         return lowBatteryView;
                     if (root.mode === "timer")
@@ -306,6 +308,23 @@ Item {
 
             StyledText {
                 text: qsTr("Charging – %1%").arg(Math.round(UPower.displayDevice.percentage * 100))
+                font: Tokens.font.body.medium
+            }
+        }
+    }
+
+    Component {
+        id: unpluggedView
+
+        RowLayout {
+            spacing: Tokens.spacing.small
+
+            MaterialIcon {
+                text: "battery_std"
+            }
+
+            StyledText {
+                text: qsTr("Unplugged – %1%").arg(Math.round(UPower.displayDevice.percentage * 100))
                 font: Tokens.font.body.medium
             }
         }

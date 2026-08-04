@@ -67,6 +67,12 @@ Singleton {
         transientTimer.restart();
     }
 
+    function flashUnplugged(): void {
+        transientMode = "unplugged";
+        transientTimer.interval = 3000;
+        transientTimer.restart();
+    }
+
     function flashLowBattery(): void {
         transientMode = "lowbattery";
         transientTimer.interval = 4000;
@@ -157,7 +163,9 @@ Singleton {
 
     Connections {
         function onOnBatteryChanged(): void {
-            if (!UPower.onBattery)
+            if (UPower.onBattery)
+                root.flashUnplugged();
+            else
                 root.flashCharging();
         }
 
