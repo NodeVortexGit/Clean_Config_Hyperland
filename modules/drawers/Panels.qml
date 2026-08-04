@@ -6,7 +6,6 @@ import qs.modules.bar as Bar
 import qs.modules.dashboard as Dashboard
 import qs.modules.launcher as Launcher
 import qs.modules.notifications as Notifications
-import qs.modules.osd as Osd
 import qs.modules.session as Session
 import qs.modules.sidebar as Sidebar
 import qs.modules.utilities as Utilities
@@ -36,8 +35,11 @@ Item {
 
     anchors.fill: parent
     anchors.margins: borderThickness
-    anchors.topMargin: bar.implicitHeight
 
+    // OSD has been replaced by the top-center island (services/Island.qml's
+    // volume/brightness transient modes). This inert placeholder is kept only
+    // because Interactions.qml/ContentWindow.qml still reference
+    // panels.osd/panels.osdWrapper for hover-region bookkeeping.
     Item {
         id: osdWrapper
 
@@ -46,18 +48,13 @@ Item {
         anchors.rightMargin: sessionWrapper.anchors.rightMargin + session.width * (1 - session.offsetScale)
         clip: sidebar.visible || session.visible
 
-        implicitWidth: osd.implicitWidth * (1 - osd.offsetScale)
-        implicitHeight: osd.implicitHeight
+        implicitWidth: 0
+        implicitHeight: 0
 
-        Osd.Wrapper {
+        QtObject {
             id: osd
 
-            screen: root.screen
-            visibilities: root.visibilities
-            sidebarOrSessionVisible: sidebar.visible || session.visible
-
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.right: parent.right
+            property bool hovered: false
         }
     }
 

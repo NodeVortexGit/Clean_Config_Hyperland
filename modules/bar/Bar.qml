@@ -1,12 +1,10 @@
 pragma ComponentBehavior: Bound
 
 import "popouts" as BarPopouts
-import "components" as BarComponents
+import "island" as Island_
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Bluetooth
-import Quickshell.Services.UPower
 import Caelestia.Config
 import qs.components
 import qs.services
@@ -23,6 +21,7 @@ Item {
 
     readonly property int hPadding: Tokens.padding.large
     readonly property string mode: Island.mode
+    readonly property bool fullyExpanded: Island.fullyExpanded
 
     function closeTray(): void {}
 
@@ -45,15 +44,15 @@ Item {
     }
 
     function onPillClicked(): void {
-        if (mode === "notification") {
+        if (root.fullyExpanded) {
+            Island.collapse();
+        } else if (mode === "notification") {
             root.visibilities.sidebar = true;
             Island.dismissTransient();
-        } else if (mode === "workspace") {
+        } else if (mode === "workspace" || mode === "volume" || mode === "brightness") {
             // let it revert on its own
-        } else if (mode === "music") {
-            root.visibilities.dashboard = true;
         } else {
-            Island.toggleMenu();
+            Island.toggleFullyExpanded();
         }
     }
 
@@ -65,19 +64,32 @@ Item {
 
         anchors.centerIn: parent
 
-        implicitWidth: Math.max(root.compactHeight, content.implicitWidth + root.hPadding * 2)
-        implicitHeight: content.implicitHeight + Tokens.padding.small * 2
-        radius: height / 2
+        readonly property real compactWidth: Math.max(root.compactHeight, compactContent.implicitWidth + root.hPadding * 2)
+        readonly property real compactHeight: compactContent.implicitHeight + Tokens.padding.small * 2
+        readonly property real expandedWidth: root.screen.width - Tokens.padding.extraLargeIncreased * 4
+        readonly property real expandedHeight: root.screen.height - Tokens.padding.extraLargeIncreased * 4
+
+        implicitWidth: root.fullyExpanded ? expandedWidth : compactWidth
+        implicitHeight: root.fullyExpanded ? expandedHeight : compactHeight
+        radius: Math.min(height / 2, Tokens.rounding.extraLarge)
 
         color: Qt.alpha(Colours.tPalette.m3surfaceContainer, Colours.tPalette.m3surfaceContainer.a)
         border.width: 1
         border.color: Qt.alpha(Colours.palette.m3onSurface, 0.08)
 
         Behavior on implicitWidth {
-            Anim {}
+            Anim {
+                type: Anim.ExpressiveDefaultSpatial
+            }
         }
 
         Behavior on implicitHeight {
+            Anim {
+                type: Anim.ExpressiveDefaultSpatial
+            }
+        }
+
+        Behavior on radius {
             Anim {}
         }
 
@@ -106,26 +118,60 @@ Item {
         }
 
         RowLayout {
-            id: content
+            id: compactContent
 
             anchors.centerIn: parent
             spacing: Tokens.spacing.small
 
+            visible: opacity > 0
+            opacity: root.fullyExpanded ? 0 : 1
+
+            Behavior on opacity {
+                Anim {
+                    type: Anim.FastEffects
+                }
+            }
+
             Loader {
                 asynchronous: false
+                active: !root.fullyExpanded
                 sourceComponent: {
                     if (root.mode === "notification")
                         return notificationView;
                     if (root.mode === "workspace")
                         return workspaceView;
+                    if (root.mode === "volume")
+                        return volumeView;
+                    if (root.mode === "brightness")
+                        return brightnessView;
                     if (root.mode === "timer")
                         return timerView;
                     if (root.mode === "music")
                         return musicView;
-                    if (root.mode === "menu")
-                        return menuView;
                     return idleView;
                 }
+            }
+        }
+
+        Loader {
+            id: expandedContent
+
+            anchors.fill: parent
+            anchors.margins: Tokens.padding.large
+
+            active: root.fullyExpanded
+            asynchronous: false
+            opacity: root.fullyExpanded ? 1 : 0
+            visible: opacity > 0
+
+            Behavior on opacity {
+                Anim {
+                    type: Anim.DefaultEffects
+                }
+            }
+
+            sourceComponent: Island_.FullScreen {
+                visibilities: root.visibilities
             }
         }
     }
@@ -178,6 +224,70 @@ Item {
     }
 
     Component {
+        id: volumeView
+
+        RowLayout {
+            spacing: Tokens.spacing.small
+
+            MaterialIcon {
+                text: Icons.getVolumeIcon(Audio.volume, Audio.muted)
+            }
+
+            Rectangle {
+                Layout.preferredWidth: 80
+                Layout.preferredHeight: 4
+                radius: 2
+                color: Qt.alpha(Colours.palette.m3onSurface, 0.15)
+
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    width: parent.width * Math.min(1, Audio.volume)
+                    radius: parent.radius
+                    color: Colours.palette.m3primary
+
+                    Behavior on width {
+                        Anim {}
+                    }
+                }
+            }
+        }
+    }
+
+    Component {
+        id: brightnessView
+
+        RowLayout {
+            spacing: Tokens.spacing.small
+
+            MaterialIcon {
+                text: "brightness_medium"
+            }
+
+            Rectangle {
+                Layout.preferredWidth: 80
+                Layout.preferredHeight: 4
+                radius: 2
+                color: Qt.alpha(Colours.palette.m3onSurface, 0.15)
+
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    width: parent.width * Math.min(1, Island.brightnessMonitor?.brightness ?? 0)
+                    radius: parent.radius
+                    color: Colours.palette.m3primary
+
+                    Behavior on width {
+                        Anim {}
+                    }
+                }
+            }
+        }
+    }
+
+    Component {
         id: timerView
 
         RowLayout {
@@ -215,24 +325,6 @@ Item {
                 elide: Text.ElideRight
                 text: Players.active ? `${Players.active.trackArtist} - ${Players.active.trackTitle}` : ""
                 font: Tokens.font.body.small
-            }
-        }
-    }
-
-    Component {
-        id: menuView
-
-        RowLayout {
-            spacing: Tokens.spacing.large
-
-            BarComponents.IslandWorkspaces {}
-
-            BarComponents.IslandStatus {}
-
-            BarComponents.IslandTimerControls {}
-
-            BarComponents.Power {
-                visibilities: root.visibilities
             }
         }
     }

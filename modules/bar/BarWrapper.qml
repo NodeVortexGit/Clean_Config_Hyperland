@@ -21,7 +21,6 @@ Item {
     readonly property int compactHeight: Tokens.sizes.bar.innerWidth + padding * 2
     readonly property real clampedWidth: Math.max(Config.border.minThickness, implicitWidth)
     readonly property real clampedHeight: Math.max(Config.border.minThickness, implicitHeight)
-    readonly property int exclusiveZone: !disabled ? compactHeight : Config.border.thickness
     readonly property bool shouldBeVisible: !fullscreen && !disabled && (Config.bar.persistent || visibilities.bar || isHovered)
     property bool isHovered
 

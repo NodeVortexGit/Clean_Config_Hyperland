@@ -66,7 +66,7 @@ StyledWindow {
     name: "drawers"
     WlrLayershell.exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: (fsTransitionProg > 0 && contentItem.Config.general.showOverFullscreen) || (hasSpecialWorkspace && hasFullscreenOnNormalWs) ? WlrLayer.Overlay : WlrLayer.Top
-    WlrLayershell.keyboardFocus: visibilities.launcher || visibilities.session ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: visibilities.launcher || visibilities.session || Island.fullyExpanded ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     mask: hasFullscreen ? emptyRegion : regions
 
@@ -87,16 +87,9 @@ StyledWindow {
         id: emptyRegion
 
         x: panels.notifications.x + root.borderThickness
-        y: panels.notifications.y + bar.implicitHeight
+        y: panels.notifications.y + root.borderThickness
         width: panels.notifications.width
         height: panels.notifications.height
-
-        Region {
-            x: root.width - width
-            y: panels.osdWrapper.y + bar.implicitHeight
-            width: panels.osdWrapper.width * (1 - panels.osd.offsetScale) + root.borderThickness
-            height: panels.osd.height
-        }
     }
 
     Regions {
@@ -158,7 +151,7 @@ StyledWindow {
             radius: root.borderRounding
             borderLeft: root.borderThickness - anchors.margins - root.sdfBorderOffset
             borderRight: root.borderThickness - anchors.margins - root.sdfBorderOffset
-            borderTop: bar.implicitHeight - anchors.margins - root.sdfBorderOffset
+            borderTop: root.borderThickness - anchors.margins - root.sdfBorderOffset
             borderBottom: root.borderThickness - anchors.margins - root.sdfBorderOffset
         }
 
@@ -193,15 +186,6 @@ StyledWindow {
             implicitHeight: panel.height * (1 / rawDeformMatrix.m22) + 2
             exclude: panels.sidebar.offsetScale > 0.08 ? [] : [utilsBg]
             bottomLeftRadius: Math.max(0, Math.min(1, panels.sidebar.offsetScale / 0.3)) * radius
-        }
-
-        PanelBg {
-            id: osdBg
-
-            panel: panels.osdWrapper
-            deformAmount: 0.25
-            x: panels.osdWrapper.x + panels.osd.x + root.borderThickness
-            implicitWidth: panels.osd.width
         }
 
         PanelBg {
@@ -276,9 +260,6 @@ StyledWindow {
             sidebar.transform: Matrix4x4 {
                 matrix: sidebarBg.deformMatrix
             }
-            osd.transform: Matrix4x4 {
-                matrix: osdBg.deformMatrix
-            }
             notifications.transform: Matrix4x4 {
                 matrix: notifsBg.deformMatrix
             }
@@ -312,7 +293,7 @@ StyledWindow {
 
         group: blobGroup
         x: panel.x + root.borderThickness
-        y: panel.y + bar.implicitHeight
+        y: panel.y + root.borderThickness
         implicitWidth: panel.width
         implicitHeight: panel.height
         radius: Tokens.rounding.extraLarge

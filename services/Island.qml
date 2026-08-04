@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
+import Caelestia.Config
 import qs.services
 
 Singleton {
@@ -13,17 +14,18 @@ Singleton {
     readonly property bool hasMusic: (Players.active?.isPlaying ?? false)
     readonly property string restingMode: hasTimer ? "timer" : hasMusic ? "music" : "idle"
 
+    readonly property Brightness.Monitor brightnessMonitor: Brightness.getMonitor("active")
+
     // Transient overlays win over the resting mode, then time out back to it
     property string transientMode: ""
-    // User-opened overlay (workspaces/tray/status/power), toggled by clicking the pill
-    property bool menuOpen: false
+    // Full-screen quick-settings / media takeover, toggled by tapping the pill
+    property bool fullyExpanded: false
 
-    readonly property string mode: transientMode !== "" ? transientMode : (menuOpen ? "menu" : restingMode)
-    readonly property bool expanded: transientMode !== "" || menuOpen
+    readonly property string mode: transientMode !== "" ? transientMode : restingMode
+    readonly property bool expanded: transientMode !== "" || fullyExpanded
 
     function notify(): void {
         transientMode = "notification";
-        menuOpen = false;
         transientTimer.interval = 5000;
         transientTimer.restart();
     }
@@ -36,14 +38,30 @@ Singleton {
         transientTimer.restart();
     }
 
-    function toggleMenu(): void {
-        if (transientMode !== "")
+    function flashVolume(): void {
+        if (transientMode === "notification")
             return;
-        menuOpen = !menuOpen;
+        transientMode = "volume";
+        transientTimer.interval = Config.osd.hideDelay;
+        transientTimer.restart();
     }
 
-    function closeMenu(): void {
-        menuOpen = false;
+    function flashBrightness(): void {
+        if (transientMode === "notification")
+            return;
+        transientMode = "brightness";
+        transientTimer.interval = Config.osd.hideDelay;
+        transientTimer.restart();
+    }
+
+    function toggleFullyExpanded(): void {
+        if (transientMode !== "")
+            return;
+        fullyExpanded = !fullyExpanded;
+    }
+
+    function collapse(): void {
+        fullyExpanded = false;
     }
 
     function dismissTransient(): void {
@@ -73,5 +91,35 @@ Singleton {
         }
 
         target: Hypr
+    }
+
+    Connections {
+        function onMutedChanged(): void {
+            root.flashVolume();
+        }
+
+        function onVolumeChanged(): void {
+            root.flashVolume();
+        }
+
+        function onSourceMutedChanged(): void {
+            if (Config.osd.enableMicrophone)
+                root.flashVolume();
+        }
+
+        function onSourceVolumeChanged(): void {
+            if (Config.osd.enableMicrophone)
+                root.flashVolume();
+        }
+
+        target: Audio
+    }
+
+    Connections {
+        function onBrightnessChanged(): void {
+            root.flashBrightness();
+        }
+
+        target: root.brightnessMonitor
     }
 }
