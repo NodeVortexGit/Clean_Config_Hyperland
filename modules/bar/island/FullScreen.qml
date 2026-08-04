@@ -48,10 +48,9 @@ Item {
             RowLayout {
                 Layout.fillWidth: true
 
-                Item {
-                    Layout.fillWidth: true
-                }
-
+                // Sits top-left - top-right is reserved for the persistent
+                // close button added in Bar.qml, which sits on top of
+                // whatever this view shows.
                 Item {
                     implicitWidth: settingsIcon.implicitHeight + Tokens.padding.small
                     implicitHeight: settingsIcon.implicitHeight + Tokens.padding.small
@@ -70,6 +69,10 @@ Item {
                         anchors.centerIn: parent
                         text: "tune"
                     }
+                }
+
+                Item {
+                    Layout.fillWidth: true
                 }
             }
 
