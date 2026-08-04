@@ -63,7 +63,10 @@ Item {
                 spacing: Tokens.spacing.extraLarge
 
                 ColumnLayout {
-                    Layout.preferredWidth: parent.width * 0.32
+                    Layout.preferredWidth: 460
+                    Layout.minimumWidth: 460
+                    Layout.maximumWidth: 460
+                    Layout.fillWidth: false
                     Layout.fillHeight: true
                     spacing: Tokens.spacing.large
 
@@ -105,6 +108,7 @@ Item {
                 DashMedia.LyricsAndSelector {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+                    Layout.minimumWidth: 200
                 }
             }
         }
