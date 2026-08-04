@@ -195,6 +195,10 @@ Singleton {
             root.collapse();
         }
 
+        function state(): string {
+            return `mode=${root.mode} fullyExpanded=${root.fullyExpanded} forceSettingsPage=${root.forceSettingsPage} transientMode=${root.transientMode}`;
+        }
+
         function settings(): void {
             transientTimer.stop();
             root.transientMode = "";

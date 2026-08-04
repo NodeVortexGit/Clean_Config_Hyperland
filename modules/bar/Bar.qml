@@ -50,12 +50,11 @@ Item {
         } else if (mode === "notification") {
             root.visibilities.sidebar = true;
             Island.dismissTransient();
-        } else {
-            // A tap always means "let me in" - Island.toggleFullyExpanded()
-            // drops any stuck/looping transient before opening, so the pill
-            // can never become permanently untappable.
-            Island.toggleFullyExpanded();
         }
+        // Full-screen expansion tap is temporarily disabled: it has frozen
+        // the whole compositor twice on a real tap. Re-enable once the cause
+        // is found (see services/Island.qml IPC "toggle"/"settings" for
+        // manual, controlled testing in the meantime).
     }
 
     implicitWidth: pill.implicitWidth
