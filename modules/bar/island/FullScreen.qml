@@ -34,7 +34,13 @@ Item {
     readonly property var curatedBudsActionIds: ["AncToggle", "AmbientToggle", "SwitchAncSensitivity", "ToggleConversationDetect", "ToggleDoubleEdgeTouch", "LockTouchpadToggle", "StartStopFind"]
     readonly property var curatedBudsActions: GalaxyBuds.actions.filter(a => root.curatedBudsActionIds.includes(a.id))
 
-    Component.onCompleted: GalaxyBuds.polling = true
+    focus: true
+    Keys.onEscapePressed: Island.collapse()
+
+    Component.onCompleted: {
+        GalaxyBuds.polling = true;
+        forceActiveFocus();
+    }
     Component.onDestruction: GalaxyBuds.polling = false
 
     Loader {
