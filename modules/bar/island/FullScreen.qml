@@ -239,34 +239,52 @@ Item {
                     visible: active
 
                     sourceComponent: Card {
-                        RowLayout {
+                        ColumnLayout {
                             spacing: Tokens.spacing.small
 
-                            MaterialIcon {
-                                text: "headset"
+                            RowLayout {
+                                spacing: Tokens.spacing.small
+
+                                MaterialIcon {
+                                    text: "headset"
+                                }
+
+                                StyledText {
+                                    text: qsTr("Galaxy Buds connected")
+                                    font: Tokens.font.body.small
+                                }
                             }
 
-                            StyledText {
-                                text: qsTr("Galaxy Buds connected")
-                                font: Tokens.font.body.small
-                            }
+                            Flow {
+                                Layout.preferredWidth: 600
+                                spacing: Tokens.spacing.small
 
-                            Repeater {
-                                model: GalaxyBuds.actions
+                                Repeater {
+                                    model: GalaxyBuds.actions
 
-                                StateLayer {
-                                    required property var modelData
+                                    Item {
+                                        id: actionBtn
 
-                                    implicitWidth: label.implicitWidth + Tokens.padding.medium
-                                    implicitHeight: label.implicitHeight + Tokens.padding.small
-                                    radius: Tokens.rounding.full
-                                    onClicked: GalaxyBuds.execute(modelData.id)
+                                        required property var modelData
 
-                                    StyledText {
-                                        id: label
-                                        anchors.centerIn: parent
-                                        text: modelData.name
-                                        font: Tokens.font.body.small
+                                        implicitWidth: label.implicitWidth + Tokens.padding.medium
+                                        implicitHeight: label.implicitHeight + Tokens.padding.small
+
+                                        StateLayer {
+                                            anchors.fill: undefined
+                                            anchors.centerIn: parent
+                                            implicitWidth: parent.implicitWidth
+                                            implicitHeight: parent.implicitHeight
+                                            radius: Tokens.rounding.full
+                                            onClicked: GalaxyBuds.execute(actionBtn.modelData.id)
+                                        }
+
+                                        StyledText {
+                                            id: label
+                                            anchors.centerIn: parent
+                                            text: actionBtn.modelData.name
+                                            font: Tokens.font.body.small
+                                        }
                                     }
                                 }
                             }
