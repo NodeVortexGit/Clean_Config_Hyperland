@@ -281,10 +281,6 @@ Item {
         }
     }
 
-    focus: true
-    Keys.onEscapePressed: Island.collapse()
-    Component.onCompleted: forceActiveFocus()
-
     component Card: StyledRect {
         default property alias content: inner.data
 

@@ -195,6 +195,13 @@ Singleton {
             root.collapse();
         }
 
+        function settings(): void {
+            transientTimer.stop();
+            root.transientMode = "";
+            root.forceSettingsPage = true;
+            root.fullyExpanded = true;
+        }
+
         target: "island"
     }
 }
