@@ -176,6 +176,7 @@ Item {
                 Layout.column: 0
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                Layout.minimumWidth: 340
 
                 BarPopouts.Network {
                     popouts: root.popoutState
@@ -188,6 +189,7 @@ Item {
                 Layout.column: 1
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                Layout.minimumWidth: 340
 
                 BarPopouts.Bluetooth {
                     popouts: root.popoutState
