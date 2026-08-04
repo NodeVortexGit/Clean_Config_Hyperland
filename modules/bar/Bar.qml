@@ -182,6 +182,27 @@ Item {
                 visibilities: root.visibilities
             }
         }
+
+        // Always-visible, always-on-top close button while expanded - independent
+        // of whatever content is inside, so there's never a state where the only
+        // way out is finding empty space to tap in a busy panel.
+        StateLayer {
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.margins: Tokens.padding.large
+            implicitWidth: implicitHeight
+            implicitHeight: closeIcon.implicitHeight + Tokens.padding.small
+
+            visible: root.fullyExpanded
+            radius: Tokens.rounding.full
+            onClicked: Island.collapse()
+
+            MaterialIcon {
+                id: closeIcon
+                anchors.centerIn: parent
+                text: "close"
+            }
+        }
     }
 
     Component {

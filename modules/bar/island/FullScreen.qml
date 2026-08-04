@@ -121,183 +121,191 @@ Item {
         anchors.fill: parent
         active: !root.showMedia
         visible: active
-        sourceComponent: Flickable {
+        sourceComponent: GridLayout {
             anchors.fill: parent
-            contentWidth: width
-            contentHeight: grid.implicitHeight
-            clip: true
+            anchors.margins: Tokens.padding.medium
+            columns: 3
+            rowSpacing: Tokens.spacing.large
+            columnSpacing: Tokens.spacing.large
 
-            ColumnLayout {
-                id: grid
+            StyledRect {
+                Layout.row: 0
+                Layout.column: 0
+                Layout.fillWidth: true
+                implicitHeight: 140
+                radius: Tokens.rounding.large
+                color: Colours.tPalette.m3surfaceContainerHigh
 
-                width: parent.width
-                spacing: Tokens.spacing.large
+                DashCards.DateTime {
+                    anchors.fill: parent
+                }
+            }
+
+            Card {
+                Layout.row: 0
+                Layout.column: 1
+                Layout.fillWidth: true
+                DashCards.SmallWeather {}
+            }
+
+            Card {
+                Layout.row: 0
+                Layout.column: 2
+                Layout.fillWidth: true
+                BarPopouts.Battery {}
+            }
+
+            FixedCard {
+                Layout.row: 1
+                Layout.rowSpan: 2
+                Layout.column: 0
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+
+                BarPopouts.Network {
+                    popouts: root.popoutState
+                    view: "wireless"
+                }
+            }
+
+            FixedCard {
+                Layout.row: 1
+                Layout.rowSpan: 2
+                Layout.column: 1
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+
+                BarPopouts.Bluetooth {
+                    popouts: root.popoutState
+                }
+            }
+
+            Card {
+                Layout.row: 1
+                Layout.column: 2
+                Layout.fillWidth: true
 
                 RowLayout {
-                    Layout.fillWidth: true
-                    Layout.alignment: Qt.AlignHCenter
                     spacing: Tokens.spacing.large
 
-                    StyledRect {
-                        implicitWidth: Tokens.sizes.dashboard.dateTimeWidth + Tokens.padding.large * 2
-                        implicitHeight: 140
-                        radius: Tokens.rounding.large
-                        color: Colours.tPalette.m3surfaceContainerHigh
-
-                        DashCards.DateTime {
-                            anchors.fill: parent
-                        }
+                    QuickToggle {
+                        icon: "do_not_disturb_on"
+                        label: qsTr("Focus")
+                        checked: Notifs.dnd
+                        onToggled: Notifs.dnd = !Notifs.dnd
                     }
 
-                    Card {
-                        DashCards.SmallWeather {}
-                    }
-
-                    Card {
-                        BarPopouts.Battery {}
+                    QuickToggle {
+                        icon: "airplanemode_active"
+                        label: qsTr("Airplane")
+                        checked: Airplane.enabled
+                        onToggled: Airplane.toggle()
                     }
                 }
+            }
+
+            Card {
+                Layout.row: 2
+                Layout.column: 2
+                Layout.fillWidth: true
+                Layout.fillHeight: true
 
                 RowLayout {
-                    Layout.fillWidth: true
-                    Layout.alignment: Qt.AlignHCenter
-                    spacing: Tokens.spacing.large
+                    spacing: Tokens.spacing.extraLarge
 
-                    Card {
-                        BarPopouts.Network {
-                            popouts: root.popoutState
-                            view: "wireless"
-                        }
-                    }
+                    BarComponents.IslandWorkspaces {}
 
-                    Card {
-                        BarPopouts.Bluetooth {
-                            popouts: root.popoutState
-                        }
-                    }
+                    BarComponents.IslandTimerControls {}
                 }
+            }
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.alignment: Qt.AlignHCenter
-                    spacing: Tokens.spacing.large
+            StyledRect {
+                id: calendarCard
 
-                    Card {
+                Layout.row: 3
+                Layout.column: 0
+                Layout.fillWidth: true
+                implicitHeight: calendar.implicitHeight + Tokens.padding.large * 2
+                radius: Tokens.rounding.large
+                color: Colours.tPalette.m3surfaceContainerHigh
+
+                DashCards.Calendar {
+                    id: calendar
+
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.margins: Tokens.padding.large
+                    dashState: root.dashState
+                }
+            }
+
+            Loader {
+                Layout.row: 3
+                Layout.column: 1
+                Layout.fillWidth: true
+                active: GalaxyBuds.connected
+                visible: active
+
+                sourceComponent: Card {
+                    ColumnLayout {
+                        spacing: Tokens.spacing.small
+
                         RowLayout {
-                            spacing: Tokens.spacing.large
-
-                            QuickToggle {
-                                icon: "do_not_disturb_on"
-                                label: qsTr("Focus")
-                                checked: Notifs.dnd
-                                onToggled: Notifs.dnd = !Notifs.dnd
-                            }
-
-                            QuickToggle {
-                                icon: "airplanemode_active"
-                                label: qsTr("Airplane")
-                                checked: Airplane.enabled
-                                onToggled: Airplane.toggle()
-                            }
-                        }
-                    }
-
-                    Card {
-                        RowLayout {
-                            spacing: Tokens.spacing.extraLarge
-
-                            BarComponents.IslandWorkspaces {}
-
-                            BarComponents.IslandTimerControls {}
-                        }
-                    }
-                }
-
-                StyledRect {
-                    id: calendarCard
-
-                    Layout.alignment: Qt.AlignHCenter
-                    implicitWidth: 400 + Tokens.padding.large * 2
-                    implicitHeight: calendar.implicitHeight + Tokens.padding.large * 2
-                    radius: Tokens.rounding.large
-                    color: Colours.tPalette.m3surfaceContainerHigh
-
-                    DashCards.Calendar {
-                        id: calendar
-
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.margins: Tokens.padding.large
-                        dashState: root.dashState
-                    }
-                }
-
-                Loader {
-                    Layout.alignment: Qt.AlignHCenter
-                    active: GalaxyBuds.connected
-                    visible: active
-
-                    sourceComponent: Card {
-                        ColumnLayout {
                             spacing: Tokens.spacing.small
 
-                            RowLayout {
-                                spacing: Tokens.spacing.small
-
-                                MaterialIcon {
-                                    text: "headset"
-                                }
-
-                                StyledText {
-                                    text: qsTr("Galaxy Buds connected")
-                                    font: Tokens.font.body.small
-                                }
+                            MaterialIcon {
+                                text: "headset"
                             }
 
-                            Flow {
-                                Layout.preferredWidth: 600
-                                spacing: Tokens.spacing.small
+                            StyledText {
+                                text: qsTr("Galaxy Buds connected")
+                                font: Tokens.font.body.small
+                            }
+                        }
 
-                                Repeater {
-                                    model: GalaxyBuds.actions
+                        Flow {
+                            Layout.preferredWidth: 400
+                            spacing: Tokens.spacing.small
 
-                                    Item {
-                                        id: actionBtn
+                            Repeater {
+                                model: GalaxyBuds.actions
 
-                                        required property var modelData
+                                Item {
+                                    id: actionBtn
 
-                                        implicitWidth: label.implicitWidth + Tokens.padding.medium
-                                        implicitHeight: label.implicitHeight + Tokens.padding.small
+                                    required property var modelData
 
-                                        StateLayer {
-                                            anchors.fill: undefined
-                                            anchors.centerIn: parent
-                                            implicitWidth: parent.implicitWidth
-                                            implicitHeight: parent.implicitHeight
-                                            radius: Tokens.rounding.full
-                                            onClicked: GalaxyBuds.execute(actionBtn.modelData.id)
-                                        }
+                                    implicitWidth: label.implicitWidth + Tokens.padding.medium
+                                    implicitHeight: label.implicitHeight + Tokens.padding.small
 
-                                        StyledText {
-                                            id: label
-                                            anchors.centerIn: parent
-                                            text: actionBtn.modelData.name
-                                            font: Tokens.font.body.small
-                                        }
+                                    StateLayer {
+                                        anchors.fill: undefined
+                                        anchors.centerIn: parent
+                                        implicitWidth: parent.implicitWidth
+                                        implicitHeight: parent.implicitHeight
+                                        radius: Tokens.rounding.full
+                                        onClicked: GalaxyBuds.execute(actionBtn.modelData.id)
+                                    }
+
+                                    StyledText {
+                                        id: label
+                                        anchors.centerIn: parent
+                                        text: actionBtn.modelData.name
+                                        font: Tokens.font.body.small
                                     }
                                 }
                             }
                         }
                     }
                 }
+            }
 
-                BarComponents.Power {
-                    Layout.alignment: Qt.AlignHCenter
-                    Layout.topMargin: Tokens.spacing.medium
-                    Layout.bottomMargin: Tokens.spacing.medium
-                    visibilities: root.visibilities
-                }
+            BarComponents.Power {
+                Layout.row: 3
+                Layout.column: 2
+                Layout.alignment: Qt.AlignHCenter
+                visibilities: root.visibilities
             }
         }
     }
@@ -316,6 +324,24 @@ Item {
             anchors.centerIn: parent
             implicitWidth: childrenRect.width
             implicitHeight: childrenRect.height
+        }
+    }
+
+    // Like Card, but clips to whatever height the Layout actually gives it
+    // instead of growing to fit content - used for the Network/Bluetooth
+    // device lists, which can otherwise get tall enough to force the whole
+    // grid to need scrolling.
+    component FixedCard: StyledRect {
+        default property alias content: inner.data
+
+        radius: Tokens.rounding.large
+        color: Colours.tPalette.m3surfaceContainerHigh
+        clip: true
+
+        Item {
+            id: inner
+            anchors.fill: parent
+            anchors.margins: Tokens.padding.large
         }
     }
 
