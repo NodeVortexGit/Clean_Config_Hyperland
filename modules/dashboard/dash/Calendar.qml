@@ -3,11 +3,9 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import M3Shapes
 import Caelestia.Config
 import qs.components
 import qs.components.controls
-import qs.components.effects
 import qs.services
 
 CustomMouseArea {
@@ -61,7 +59,7 @@ CustomMouseArea {
                 implicitHeight: monthYearDisplay.implicitHeight + Tokens.padding.extraSmall * 2
 
                 StateLayer {
-                    color: Colours.palette.m3primary
+                    color: DarkAccent.accent
                     radius: pressed ? Tokens.rounding.small : Tokens.rounding.large
                     disabled: {
                         const now = new Date();
@@ -81,7 +79,7 @@ CustomMouseArea {
 
                     anchors.centerIn: parent
                     text: grid.title
-                    color: Colours.palette.m3primary
+                    color: DarkAccent.accent
                     font: Tokens.font.title.builders.small.capitalisation(Font.Capitalize).build()
                 }
             }
@@ -107,7 +105,7 @@ CustomMouseArea {
                 horizontalAlignment: Text.AlignHCenter
                 text: model.shortName
                 font: Tokens.font.body.builders.small.weight(Font.Medium).build()
-                color: (model.day === 0 || model.day === 6) ? Colours.palette.m3tertiary : Colours.palette.m3onSurface
+                color: DarkAccent.textMuted
             }
         }
 
@@ -131,8 +129,29 @@ CustomMouseArea {
 
                     required property var model
 
+                    // Strictly before today's real date, regardless of which
+                    // month/year is currently being viewed.
+                    readonly property bool isPast: {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        return dayItem.model.date < today && !dayItem.model.today;
+                    }
+
                     implicitWidth: implicitHeight
-                    implicitHeight: text.implicitHeight + Tokens.padding.small
+                    implicitHeight: text.implicitHeight + Tokens.padding.small * 2
+
+                    Rectangle {
+                        visible: dayItem.model.today
+                        anchors.centerIn: parent
+                        width: Math.max(parent.width, parent.height) - Tokens.padding.medium
+                        height: width
+                        radius: width / 2
+                        color: DarkAccent.accent
+
+                        Behavior on color {
+                            CAnim {}
+                        }
+                    }
 
                     StyledText {
                         id: text
@@ -141,72 +160,20 @@ CustomMouseArea {
 
                         horizontalAlignment: Text.AlignHCenter
                         text: grid.locale.toString(dayItem.model.day)
-                        color: {
-                            const dayOfWeek = dayItem.model.date.getDay();
-                            if (dayOfWeek === 0 || dayOfWeek === 6)
-                                return Colours.palette.m3tertiary;
-
-                            return Colours.palette.m3onSurfaceVariant;
-                        }
-                        opacity: dayItem.model.today || dayItem.model.month === grid.month ? 1 : 0.4
+                        color: dayItem.model.today ? "black" : DarkAccent.text
                         font: Tokens.font.body.small
                     }
-                }
-            }
 
-            MaterialShape {
-                id: todayIndicator
-
-                readonly property Item todayItem: grid.contentItem.children.find(c => c.model.today) ?? null
-                property Item today
-
-                onTodayItemChanged: {
-                    if (todayItem)
-                        today = todayItem;
-                }
-
-                x: today ? today.x + (today.width - implicitWidth) / 2 : 0
-                y: today ? today.y - Tokens.padding.extraSmall - 1 : 0
-
-                implicitSize: today ? Math.max(today.implicitWidth, today.implicitHeight) + Tokens.padding.extraSmall * 2 : 0
-                shape: MaterialShape.Sunny
-
-                clip: true
-                color: Colours.palette.m3primary
-
-                opacity: todayItem ? 1 : 0
-                scale: todayItem ? 1 : 0.7
-
-                Colouriser {
-                    x: -todayIndicator.x
-                    y: -todayIndicator.y
-
-                    implicitWidth: grid.width
-                    implicitHeight: grid.height
-
-                    source: grid
-                    sourceColor: Colours.palette.m3onSurface
-                    colorizationColor: Colours.palette.m3onPrimary
-                }
-
-                Behavior on opacity {
-                    Anim {
-                        type: Anim.DefaultEffects
+                    // Every past day gets the cross, including the leading
+                    // days that belong to the previous month - those used to
+                    // be greyed out and skipped entirely.
+                    MaterialIcon {
+                        visible: dayItem.isPast
+                        anchors.centerIn: parent
+                        text: "close"
+                        color: DarkAccent.accent
+                        fontStyle: Tokens.font.icon.builders.small.scale(1.4).weight(Font.Bold).build()
                     }
-                }
-
-                Behavior on scale {
-                    Anim {
-                        type: Anim.FastSpatial
-                    }
-                }
-
-                Behavior on x {
-                    Anim {}
-                }
-
-                Behavior on y {
-                    Anim {}
                 }
             }
         }

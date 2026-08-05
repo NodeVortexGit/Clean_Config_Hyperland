@@ -58,7 +58,7 @@ StyledRect {
 
     clip: true
     radius: Tokens.rounding.large
-    color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
+    color: DarkAccent.surface
 
     Behavior on implicitHeight {
         Anim {}
@@ -102,7 +102,7 @@ StyledRect {
                 ColouredIcon {
                     implicitSize: Math.round(TokenConfig.sizes.notifs.image * 0.6)
                     source: Quickshell.iconPath(root.appIcon)
-                    colour: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
+                    colour: root.urgency === NotificationUrgency.Critical ? DarkAccent.text : root.urgency === NotificationUrgency.Low ? DarkAccent.text : DarkAccent.accentContainerText
                     layer.enabled: root.appIcon.endsWith("symbolic")
                 }
             }
@@ -112,14 +112,14 @@ StyledRect {
 
                 MaterialIcon {
                     text: Icons.getNotifIcon(root.activeNotifs[0]?.summary, root.urgency)
-                    color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
+                    color: root.urgency === NotificationUrgency.Critical ? DarkAccent.text : root.urgency === NotificationUrgency.Low ? DarkAccent.text : DarkAccent.accentContainerText
                     fontStyle: Tokens.font.icon.medium
                 }
             }
 
             StyledClippingRect {
                 anchors.fill: parent
-                color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3error : root.urgency === NotificationUrgency.Low ? Colours.layer(Colours.palette.m3surfaceContainerHigh, 3) : Colours.palette.m3secondaryContainer
+                color: root.urgency === NotificationUrgency.Critical ? DarkAccent.accent : root.urgency === NotificationUrgency.Low ? DarkAccent.surfaceHigh : DarkAccent.accentContainer
                 radius: Tokens.rounding.full
 
                 Loader {
@@ -140,14 +140,14 @@ StyledRect {
                     implicitWidth: Tokens.sizes.notifs.badge
                     implicitHeight: Tokens.sizes.notifs.badge
 
-                    color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3error : root.urgency === NotificationUrgency.Low ? Colours.palette.m3surfaceContainerHigh : Colours.palette.m3secondaryContainer
+                    color: root.urgency === NotificationUrgency.Critical ? DarkAccent.accent : root.urgency === NotificationUrgency.Low ? DarkAccent.surfaceHigh : DarkAccent.accentContainer
                     radius: Tokens.rounding.full
 
                     ColouredIcon {
                         anchors.centerIn: parent
                         implicitSize: Math.round(Tokens.sizes.notifs.badge * 0.6)
                         source: Quickshell.iconPath(root.appIcon)
-                        colour: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
+                        colour: root.urgency === NotificationUrgency.Critical ? DarkAccent.text : root.urgency === NotificationUrgency.Low ? DarkAccent.text : DarkAccent.accentContainerText
                         layer.enabled: root.appIcon.endsWith("symbolic")
                     }
                 }
@@ -174,7 +174,7 @@ StyledRect {
                 StyledText {
                     Layout.fillWidth: true
                     text: root.modelData
-                    color: Colours.palette.m3onSurfaceVariant
+                    color: DarkAccent.textMuted
                     font: Tokens.font.body.small
                     elide: Text.ElideRight
                 }
@@ -182,7 +182,7 @@ StyledRect {
                 StyledText {
                     animate: true
                     text: root.activeNotifs[0]?.timeStr ?? ""
-                    color: Colours.palette.m3outline
+                    color: DarkAccent.textMuted
                     font: Tokens.font.body.small
                 }
 
@@ -190,11 +190,11 @@ StyledRect {
                     implicitWidth: expandBtn.implicitWidth + Tokens.padding.large
                     implicitHeight: groupCount.implicitHeight + Tokens.padding.extraSmall
 
-                    color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3error : Colours.layer(Colours.palette.m3surfaceContainerHigh, 3)
+                    color: root.urgency === NotificationUrgency.Critical ? DarkAccent.accent : DarkAccent.surfaceHigh
                     radius: Tokens.rounding.full
 
                     StateLayer {
-                        color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : Colours.palette.m3onSurface
+                        color: root.urgency === NotificationUrgency.Critical ? DarkAccent.text : DarkAccent.text
                         onClicked: root.toggleExpand(!root.expanded)
                     }
 
@@ -210,14 +210,14 @@ StyledRect {
                             Layout.leftMargin: Tokens.padding.extraSmall / 2
                             animate: true
                             text: root.notifCount
-                            color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : Colours.palette.m3onSurfaceVariant
+                            color: root.urgency === NotificationUrgency.Critical ? DarkAccent.text : DarkAccent.textMuted
                             font: Tokens.font.body.small
                         }
 
                         MaterialIcon {
                             Layout.rightMargin: -Tokens.padding.extraSmall / 2
                             text: "expand_more"
-                            color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : Colours.palette.m3onSurfaceVariant
+                            color: root.urgency === NotificationUrgency.Critical ? DarkAccent.text : DarkAccent.textMuted
                             rotation: root.expanded ? 180 : 0
                             Layout.topMargin: root.expanded ? -Math.floor(Tokens.padding.extraSmall) : 0
 

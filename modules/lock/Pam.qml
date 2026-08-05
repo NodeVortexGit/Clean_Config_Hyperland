@@ -18,6 +18,22 @@ Scope {
     property string buffer
 
     signal flashMsg
+    // Correct password - the lock screen settles itself back together and
+    // then calls lock.unlock().
+    signal succeeded
+
+    // Safety net: the password was correct, so the session MUST unlock even
+    // if the settle animation never finishes (component not loaded, animation
+    // stopped, whatever). Never let a cosmetic effect trap the user.
+    Timer {
+        id: unlockWatchdog
+
+        // Long enough to clear the full settle -> fade -> suck-back -> rise
+        // chain without truncating it, short enough to still be a rescue.
+        interval: 5000
+        onTriggered: if (root.lock.locked)
+            root.lock.unlock()
+    }
 
     function handleKey(event: KeyEvent): void {
         if (passwd.active || state === "max")
@@ -59,8 +75,13 @@ Scope {
         }
 
         onCompleted: res => {
-            if (res === PamResult.Success)
-                return root.lock.unlock();
+            if (res === PamResult.Success) {
+                // Content.qml floats everything back into place first, then
+                // calls unlock() itself once it has settled.
+                root.succeeded();
+                unlockWatchdog.restart();
+                return;
+            }
 
             if (res === PamResult.Error)
                 root.state = "error";

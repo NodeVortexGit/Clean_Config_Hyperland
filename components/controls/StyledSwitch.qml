@@ -10,12 +10,18 @@ Switch {
 
     property int cLayer: 1
 
+    // Optional overrides so callers embedded in a fixed (non-wallpaper-derived)
+    // theme - like the island's quick-settings panel - can match it instead of
+    // always following the dynamic M3 accent.
+    property color accentColour: Colours.palette.m3primary
+    property color accentOnColour: Colours.palette.m3onPrimary
+
     implicitWidth: implicitIndicatorWidth
     implicitHeight: implicitIndicatorHeight
 
     indicator: StyledRect {
         radius: Tokens.rounding.full
-        color: root.checked ? Colours.palette.m3primary : Colours.layer(Colours.palette.m3surfaceContainerHighest, root.cLayer)
+        color: root.checked ? root.accentColour : Colours.layer(Colours.palette.m3surfaceContainerHighest, root.cLayer)
 
         implicitWidth: implicitHeight * 1.7
         implicitHeight: Tokens.font.body.medium.pointSize + Tokens.padding.small * 2
@@ -24,7 +30,7 @@ Switch {
             readonly property real nonAnimWidth: root.pressed ? implicitHeight * 1.2 : implicitHeight
 
             radius: Tokens.rounding.full
-            color: root.checked ? Colours.palette.m3onPrimary : Colours.layer(Colours.palette.m3outline, root.cLayer + 1)
+            color: root.checked ? root.accentOnColour : Colours.layer(Colours.palette.m3outline, root.cLayer + 1)
 
             x: root.checked ? parent.implicitWidth - nonAnimWidth - Tokens.padding.extraSmall / 2 : Tokens.padding.extraSmall / 2
             implicitWidth: nonAnimWidth
@@ -35,7 +41,7 @@ Switch {
                 anchors.fill: parent
                 radius: parent.radius
 
-                color: root.checked ? Colours.palette.m3primary : Colours.palette.m3onSurface
+                color: root.checked ? root.accentColour : Colours.palette.m3onSurface
                 opacity: root.pressed ? 0.1 : root.hovered ? 0.08 : 0
 
                 Behavior on opacity {
@@ -91,7 +97,7 @@ Switch {
 
                 ShapePath {
                     strokeWidth: root.Tokens.font.body.large.pointSize * 0.15
-                    strokeColor: root.checked ? Colours.palette.m3primary : Colours.palette.m3surfaceContainerHighest
+                    strokeColor: root.checked ? root.accentColour : Colours.palette.m3surfaceContainerHighest
                     fillColor: "transparent"
                     capStyle: root.Tokens.rounding.scale === 0 ? ShapePath.SquareCap : ShapePath.RoundCap
 

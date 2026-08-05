@@ -95,6 +95,18 @@ Singleton {
             deviceProc.running = true
     }
 
+    // Slower, always-on poll just so a low-battery warning can fire even when
+    // the quick-settings panel isn't open - the faster one above takes over
+    // (and this one backs off) whenever the panel actually needs live data.
+    Timer {
+        interval: 45000
+        running: !root.polling
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: if (!deviceProc.running)
+            deviceProc.running = true
+    }
+
     Timer {
         interval: 20000
         running: root.polling

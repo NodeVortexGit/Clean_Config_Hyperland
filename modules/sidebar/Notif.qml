@@ -20,9 +20,9 @@ StyledRect {
 
     implicitHeight: nonAnimHeight
 
-    radius: Tokens.rounding.medium
+    radius: Tokens.rounding.large
     color: {
-        const c = root.modelData?.urgency === "critical" ? Colours.palette.m3secondaryContainer : Colours.layer(Colours.palette.m3surfaceContainerHigh, 2);
+        const c = root.modelData?.urgency === "critical" ? DarkAccent.accentContainer : DarkAccent.surfaceHigh;
         return expanded ? c : Qt.alpha(c, 0);
     }
 
@@ -63,7 +63,7 @@ StyledRect {
 
         width: parent.width
         text: root.modelData?.summary ?? ""
-        color: root.modelData?.urgency === "critical" ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+        color: root.modelData?.urgency === "critical" ? DarkAccent.accentContainerText : DarkAccent.text
         elide: Text.ElideRight
         wrapMode: Text.WordWrap
         maximumLineCount: 1
@@ -90,7 +90,7 @@ StyledRect {
 
         sourceComponent: StyledText {
             text: String(root.modelData?.body ?? "").replace(/\n/g, " ")
-            color: root.modelData?.urgency === "critical" ? Colours.palette.m3secondary : Colours.palette.m3outline
+            color: DarkAccent.textMuted
             elide: Text.ElideRight
         }
     }
@@ -105,7 +105,7 @@ StyledRect {
         sourceComponent: StyledText {
             animate: true
             text: root.modelData?.timeStr ?? ""
-            color: Colours.palette.m3outline
+            color: DarkAccent.textMuted
             font: Tokens.font.body.small
         }
     }
@@ -137,7 +137,7 @@ StyledRect {
             Layout.fillWidth: true
             textFormat: Text.MarkdownText
             text: String(root.modelData?.body ?? "").replace(/(.)\n(?!\n)/g, "$1\n\n") || qsTr("No body here! :/")
-            color: root.modelData?.urgency === "critical" ? Colours.palette.m3secondary : Colours.palette.m3outline
+            color: DarkAccent.textMuted
             wrapMode: Text.WordWrap
 
             onLinkActivated: link => {

@@ -117,7 +117,7 @@ Item {
 
         scale: root.stateMsgShouldBeVisible && !root.msg ? 1 : 0.7
         opacity: root.stateMsgShouldBeVisible && !root.msg ? 1 : 0
-        color: Colours.palette.m3onSurfaceVariant
+        color: DarkAccent.textMuted
 
         font: Tokens.font.body.small
         horizontalAlignment: Qt.AlignHCenter

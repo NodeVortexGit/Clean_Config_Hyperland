@@ -64,7 +64,7 @@ Item {
         text: nonAnimPlaceholder.text
 
         animate: true
-        color: root.pam.passwd.active ? Colours.palette.m3secondary : Colours.palette.m3outline
+        color: root.pam.passwd.active ? DarkAccent.accent : DarkAccent.textMuted
         font: Tokens.font.body.builders.medium.scale(root.centerScale).width(110).build()
 
         opacity: root.buffer ? 0 : 1
@@ -134,7 +134,7 @@ Item {
             anchors.centerIn: parent
             implicitSize: charList.implicitHeight * 1.5
             shape: root.shapeQueue[char.index % root.shapeQueue.length] ?? MaterialShape.Circle
-            color: Colours.palette.m3onSurface
+            color: DarkAccent.text
 
             Behavior on color {
                 CAnim {}

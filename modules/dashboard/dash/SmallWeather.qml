@@ -21,7 +21,7 @@ Item {
 
         animate: true
         text: Weather.icon
-        color: Colours.palette.m3secondary
+        color: DarkAccent.accent
         fontStyle: Tokens.font.icon.builders.extraLarge.scale(1.6).build()
     }
 
@@ -39,7 +39,7 @@ Item {
 
             animate: true
             text: Weather.temp
-            color: Colours.palette.m3primary
+            color: DarkAccent.accent
             font: Tokens.font.headline.builders.medium.width(110).weight(Font.DemiBold).build()
         }
 
@@ -48,6 +48,7 @@ Item {
 
             animate: true
             text: Weather.description
+            color: DarkAccent.textMuted
             font: Tokens.font.body.small
 
             elide: Text.ElideRight

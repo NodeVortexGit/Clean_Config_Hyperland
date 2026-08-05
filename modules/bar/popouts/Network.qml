@@ -73,27 +73,9 @@ ColumnLayout {
             Layout.rightMargin: Tokens.padding.extraSmall
             spacing: Tokens.spacing.small
 
-            opacity: 0
-            scale: 0.7
-
-            Component.onCompleted: {
-                opacity = 1;
-                scale = 1;
-            }
-
-            Behavior on opacity {
-                Anim {
-                    type: Anim.DefaultEffects
-                }
-            }
-
-            Behavior on scale {
-                Anim {}
-            }
-
             MaterialIcon {
                 text: Icons.getNetworkIcon(networkItem.modelData.strength)
-                color: networkItem.modelData.active ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+                color: networkItem.modelData.active ? DarkAccent.accent : DarkAccent.textMuted
             }
 
             MaterialIcon {
@@ -109,7 +91,7 @@ ColumnLayout {
                 text: networkItem.modelData.ssid
                 elide: Text.ElideRight
                 font: Tokens.font.body.builders.medium.weight(networkItem.modelData.active ? Font.Medium : Font.Normal).build()
-                color: networkItem.modelData.active ? Colours.palette.m3primary : Colours.palette.m3onSurface
+                color: networkItem.modelData.active ? DarkAccent.accent : DarkAccent.text
             }
 
             StyledRect {
@@ -117,7 +99,7 @@ ColumnLayout {
                 implicitHeight: wirelessConnectIcon.implicitHeight + Tokens.padding.extraSmall
 
                 radius: Tokens.rounding.full
-                color: Qt.alpha(Colours.palette.m3primary, networkItem.modelData.active ? 1 : 0)
+                color: Qt.alpha(DarkAccent.accent, networkItem.modelData.active ? 1 : 0)
 
                 CircularIndicator {
                     anchors.fill: parent
@@ -125,7 +107,7 @@ ColumnLayout {
                 }
 
                 StateLayer {
-                    color: networkItem.modelData.active ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+                    color: DarkAccent.text
                     disabled: networkItem.loading || !Nmcli.wifiEnabled
 
                     onClicked: {
@@ -152,7 +134,7 @@ ColumnLayout {
                     anchors.centerIn: parent
                     animate: true
                     text: networkItem.modelData.active ? "link_off" : "link"
-                    color: networkItem.modelData.active ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+                    color: DarkAccent.text
 
                     opacity: networkItem.loading ? 0 : 1
 
@@ -166,59 +148,9 @@ ColumnLayout {
         }
     }
 
-    StyledRect {
-        visible: root.view === "wireless"
-        Layout.preferredHeight: visible ? implicitHeight : 0
-        Layout.topMargin: visible ? Tokens.spacing.small : 0
-        Layout.fillWidth: true
-        implicitHeight: rescanBtn.implicitHeight + Tokens.padding.small
-
-        radius: Tokens.rounding.full
-        color: Colours.palette.m3primaryContainer
-
-        StateLayer {
-            color: Colours.palette.m3onPrimaryContainer
-            disabled: Nmcli.scanning || !Nmcli.wifiEnabled
-            onClicked: Nmcli.rescanWifi()
-        }
-
-        RowLayout {
-            id: rescanBtn
-
-            anchors.centerIn: parent
-            spacing: Tokens.spacing.small
-            opacity: Nmcli.scanning ? 0 : 1
-
-            MaterialIcon {
-                id: scanIcon
-
-                Layout.topMargin: Math.round(fontInfo.pointSize * 0.0575)
-                animate: true
-                text: "wifi_find"
-                color: Colours.palette.m3onPrimaryContainer
-            }
-
-            StyledText {
-                Layout.topMargin: -Math.round(scanIcon.fontInfo.pointSize * 0.0575)
-                text: qsTr("Rescan networks")
-                color: Colours.palette.m3onPrimaryContainer
-            }
-
-            Behavior on opacity {
-                Anim {
-                    type: Anim.DefaultEffects
-                }
-            }
-        }
-
-        CircularIndicator {
-            anchors.centerIn: parent
-            strokeWidth: Tokens.padding.extraSmall / 2
-            bgColour: "transparent"
-            implicitSize: parent.implicitHeight - Tokens.padding.large
-            running: Nmcli.scanning
-        }
-    }
+    // Rescan trigger lives as a small pinned button on the card itself (see
+    // FullScreen.qml) instead of flowing here - a long network list would
+    // otherwise clip it out of reach.
 
     // Ethernet section
     StyledText {
@@ -236,7 +168,7 @@ ColumnLayout {
         Layout.topMargin: visible ? Tokens.spacing.small : 0
         Layout.rightMargin: Tokens.padding.extraSmall
         text: qsTr("%1 devices available").arg(Nmcli.ethernetDevices.length)
-        color: Colours.palette.m3onSurfaceVariant
+        color: DarkAccent.textMuted
         font: Tokens.font.body.small
     }
 
@@ -262,27 +194,9 @@ ColumnLayout {
             Layout.rightMargin: Tokens.padding.extraSmall
             spacing: Tokens.spacing.small
 
-            opacity: 0
-            scale: 0.7
-
-            Component.onCompleted: {
-                opacity = 1;
-                scale = 1;
-            }
-
-            Behavior on opacity {
-                Anim {
-                    type: Anim.DefaultEffects
-                }
-            }
-
-            Behavior on scale {
-                Anim {}
-            }
-
             MaterialIcon {
                 text: "cable"
-                color: ethernetItem.modelData.connected ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+                color: ethernetItem.modelData.connected ? DarkAccent.accent : DarkAccent.textMuted
             }
 
             StyledText {
@@ -292,7 +206,7 @@ ColumnLayout {
                 text: ethernetItem.modelData.interface || qsTr("Unknown")
                 elide: Text.ElideRight
                 font: Tokens.font.body.builders.medium.weight(ethernetItem.modelData.connected ? Font.Medium : Font.Normal).build()
-                color: ethernetItem.modelData.connected ? Colours.palette.m3primary : Colours.palette.m3onSurface
+                color: ethernetItem.modelData.connected ? DarkAccent.accent : DarkAccent.text
             }
 
             StyledRect {
@@ -300,7 +214,7 @@ ColumnLayout {
                 implicitHeight: connectIcon.implicitHeight + Tokens.padding.extraSmall
 
                 radius: Tokens.rounding.full
-                color: Qt.alpha(Colours.palette.m3primary, ethernetItem.modelData.connected ? 1 : 0)
+                color: Qt.alpha(DarkAccent.accent, ethernetItem.modelData.connected ? 1 : 0)
 
                 CircularIndicator {
                     anchors.fill: parent
@@ -308,7 +222,7 @@ ColumnLayout {
                 }
 
                 StateLayer {
-                    color: ethernetItem.modelData.connected ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+                    color: DarkAccent.text
                     disabled: ethernetItem.loading
 
                     onClicked: {
@@ -326,7 +240,7 @@ ColumnLayout {
                     anchors.centerIn: parent
                     animate: true
                     text: ethernetItem.modelData.connected ? "link_off" : "link"
-                    color: ethernetItem.modelData.connected ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+                    color: DarkAccent.text
 
                     opacity: ethernetItem.loading ? 0 : 1
 
@@ -353,11 +267,6 @@ ColumnLayout {
                     }
                 }
             }
-        }
-
-        function onScanningChanged(): void {
-            if (!Nmcli.scanning)
-                scanIcon.rotation = 0;
         }
 
         target: Nmcli
@@ -391,6 +300,8 @@ ColumnLayout {
 
         StyledSwitch {
             id: toggle
+            accentColour: DarkAccent.accent
+            accentOnColour: DarkAccent.bg
         }
     }
 }

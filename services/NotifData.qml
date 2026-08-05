@@ -39,6 +39,17 @@ QtObject {
     property bool hasActionIcons
     property list<var> actions
 
+    // Inline reply (e.g. chat apps). Not persisted across restarts - the
+    // underlying Notification object is gone by then, so there's nothing left
+    // to reply through.
+    property bool hasInlineReply
+    property string inlineReplyPlaceholder
+
+    function sendInlineReply(text: string): void {
+        if (notification && hasInlineReply)
+            notification.sendInlineReply(text);
+    }
+
     readonly property bool hasFullscreen: {
         const monitor = Hypr.focusedMonitor;
         const specialName = monitor?.lastIpcObject.specialWorkspace?.name;
@@ -165,6 +176,14 @@ QtObject {
             notif.hints = notif.notification.hints;
         }
 
+        function onHasInlineReplyChanged(): void {
+            notif.hasInlineReply = notif.notification.hasInlineReply;
+        }
+
+        function onInlineReplyPlaceholderChanged(): void {
+            notif.inlineReplyPlaceholder = notif.notification.inlineReplyPlaceholder;
+        }
+
         target: notif.notification
     }
 
@@ -232,6 +251,8 @@ QtObject {
         urgency = notification.urgency;
         resident = notification.resident;
         hasActionIcons = notification.hasActionIcons;
+        hasInlineReply = notification.hasInlineReply;
+        inlineReplyPlaceholder = notification.inlineReplyPlaceholder;
         // qmllint disable unresolved-type
         actions = notification.actions.map(a => ({
                     // qmllint enable unresolved-type

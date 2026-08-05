@@ -22,6 +22,9 @@ CustomMouseArea {
     property bool dashboardShortcutActive
     property bool osdShortcutActive
     property bool utilitiesShortcutActive
+    // Set while the notification centre was opened by shortcut rather than by
+    // hovering the top-right corner, so moving the mouse away doesn't close it.
+    property bool sidebarShortcutActive
 
     function withinPanelHeight(panel: Item, x: real, y: real): bool {
         const panelY = root.borderThickness + panel.y;
@@ -202,15 +205,20 @@ CustomMouseArea {
                 visibilities.dashboard = false;
         }
 
-        // Show utilities on hover
-        const showUtilities = inBottomPanel(panels.utilities, x, y, true);
+        // The old bottom-right utilities flyout is gone entirely.
+        visibilities.utilities = false;
 
-        // Always update visibility based on hover if not in shortcut mode
-        if (!utilitiesShortcutActive) {
-            visibilities.utilities = showUtilities;
-        } else if (showUtilities) {
-            // If hovering over utilities area while in shortcut mode, transition to hover control
-            utilitiesShortcutActive = false;
+        // Notification centre slides in when the pointer hits the right edge,
+        // and stays open while it's still anywhere over the panel.
+        if (!sidebarShortcutActive) {
+            const edge = Math.max(Config.border.minThickness, Config.border.thickness) + 12;
+            const atRightEdge = x >= width - edge;
+            const overPanel = visibilities.sidebar && x >= width - panels.sidebar.width - Config.border.thickness * 2;
+
+            if (atRightEdge)
+                visibilities.sidebar = true;
+            else if (!overPanel)
+                visibilities.sidebar = false;
         }
 
         // Show popouts on hover

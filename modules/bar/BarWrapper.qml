@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Caelestia.Config
 import qs.components
+import qs.services
 import qs.utils
 import qs.modules.bar.popouts as BarPopouts
 
@@ -21,7 +22,11 @@ Item {
     readonly property int compactHeight: Tokens.sizes.bar.innerWidth + padding * 2
     readonly property real clampedWidth: Math.max(Config.border.minThickness, implicitWidth)
     readonly property real clampedHeight: Math.max(Config.border.minThickness, implicitHeight)
-    readonly property bool shouldBeVisible: !fullscreen && !disabled && (Config.bar.persistent || visibilities.bar || isHovered)
+    // Notifications (and the reply box) still come through over a fullscreen
+    // window - otherwise the pill is the only place they're shown and they'd
+    // be silently swallowed. Everything else still hides in fullscreen.
+    readonly property bool islandDemandsAttention: Island.mode === "notification" || Island.mode === "reply" || Island.fullyExpanded
+    readonly property bool shouldBeVisible: (!fullscreen || islandDemandsAttention) && !disabled && (Config.bar.persistent || visibilities.bar || isHovered)
     property bool isHovered
 
     function closeTray(): void {

@@ -17,7 +17,7 @@ StyledRect {
         return base + brief.anchors.topMargin;
     }
     radius: Tokens.rounding.extraExtraLarge
-    color: Colours.tPalette.m3surfaceContainer
+    color: DarkAccent.surface
 
     Timer {
         running: true

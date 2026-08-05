@@ -12,8 +12,42 @@ Singleton {
     id: root
 
     readonly property list<MprisPlayer> list: Mpris.players.values
-    readonly property MprisPlayer active: props.manualActive ?? list.find(p => getIdentity(p) === GlobalConfig.services.defaultPlayer) ?? list[0] ?? null
+
+    // Whichever player last actually played, kept even after it's paused, so
+    // pausing a browser tab doesn't silently hand the island back to Spotify
+    // just because Spotify is the configured default. Cleared by
+    // clearSticky() (the island calls that when it closes).
+    property MprisPlayer sticky: null
+
+    // The configured default player (Spotify) wins whenever it's actually
+    // playing, but it shouldn't stay pinned as "active" just for existing -
+    // if it's paused/idle while something else (a browser tab, etc) is
+    // actually playing, that's what should show.
+    readonly property MprisPlayer active: {
+        if (props.manualActive)
+            return props.manualActive;
+        const defaultPlayer = list.find(p => getIdentity(p) === GlobalConfig.services.defaultPlayer) ?? null;
+        if (defaultPlayer?.isPlaying)
+            return defaultPlayer;
+        const anyPlaying = list.find(p => p.isPlaying) ?? null;
+        if (anyPlaying)
+            return anyPlaying;
+        if (sticky && list.includes(sticky))
+            return sticky;
+        return defaultPlayer ?? list[0] ?? null;
+    }
     property alias manualActive: props.manualActive
+
+    // Latch whatever is playing right now; once it pauses the binding above
+    // falls through to this instead of jumping to the default player.
+    onActiveChanged: {
+        if (active?.isPlaying)
+            sticky = active;
+    }
+
+    function clearSticky(): void {
+        sticky = null;
+    }
 
     function getIdentity(player: MprisPlayer): string {
         if (!player)

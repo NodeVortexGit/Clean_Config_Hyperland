@@ -9,7 +9,7 @@ import qs.services
 StyledRect {
     id: root
 
-    color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
+    color: DarkAccent.surfaceHigh
     radius: Tokens.rounding.extraLargeIncreased
     implicitHeight: header.anchors.margins + header.implicitHeight + Tokens.spacing.medium + layout.implicitHeight + layout.anchors.bottomMargin
 
@@ -63,7 +63,7 @@ StyledRect {
                     Layout.alignment: Qt.AlignHCenter
                     implicitSize: temp.implicitHeight + Tokens.padding.medium * 2
                     shape: MaterialShape.Cookie4Sided
-                    color: Qt.alpha(Colours.palette.m3primary, hour.index === 0 ? 1 : 0)
+                    color: Qt.alpha(DarkAccent.accent, hour.index === 0 ? 1 : 0)
 
                     Behavior on color {
                         CAnim {}
@@ -74,7 +74,7 @@ StyledRect {
 
                         anchors.centerIn: parent
                         text: Weather.formatTemp(hour.cond.tempC).slice(0, -1) // Remove C/F
-                        color: hour.index === 0 ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+                        color: hour.index === 0 ? DarkAccent.bg : DarkAccent.text
                         font: Tokens.font.title.medium
                     }
                 }
@@ -82,21 +82,21 @@ StyledRect {
                 MaterialIcon {
                     Layout.alignment: Qt.AlignHCenter
                     text: hour.cond.icon
-                    color: Colours.palette.m3secondary
+                    color: DarkAccent.accent
                     fontStyle: Tokens.font.icon.large
                 }
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
                     text: hour.cond.precipChance + "%"
-                    color: Colours.palette.m3primary
+                    color: DarkAccent.accent
                 }
 
                 StyledText {
                     Layout.topMargin: Tokens.spacing.extraSmall
                     Layout.alignment: Qt.AlignHCenter
                     text: hour.index === 0 ? qsTr("Now") : Qt.formatDateTime(new Date(hour.cond.timestamp.replace("T", " ")), GlobalConfig.services.useTwelveHourClock ? "ha" : "hh:00")
-                    color: Colours.palette.m3onSurfaceVariant
+                    color: DarkAccent.textMuted
                     font: Tokens.font.body.medium
                 }
             }

@@ -85,6 +85,7 @@ Singleton {
 
         keepOnReload: false
         actionsSupported: true
+        inlineReplySupported: true
         bodyHyperlinksSupported: true
         bodyImagesSupported: true
         bodyMarkupSupported: true

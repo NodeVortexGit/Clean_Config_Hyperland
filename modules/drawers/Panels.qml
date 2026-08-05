@@ -120,23 +120,32 @@ Item {
         borderThickness: root.borderThickness
     }
 
-    Utilities.Wrapper {
+    // The old bottom-right utilities flyout (wifi/bluetooth/dnd toggles) is
+    // gone - those live in the island's quick panel now. Kept as an inert
+    // zero-size placeholder because Regions/ContentWindow/Interactions still
+    // reference panels.utilities for geometry bookkeeping.
+    Item {
         id: utilities
 
-        visibilities: root.visibilities
-        sidebar: sidebar
-        popouts: popoutsWrapper.content
+        readonly property real offsetScale: 1
+        readonly property real nonAnimHeight: 0
+        property real horizontalStretch: 1
+        property matrix4x4 deformMatrix
 
         anchors.bottom: parent.bottom
         anchors.right: parent.right
+
+        implicitWidth: 0
+        implicitHeight: 0
     }
 
-    Toasts.Toasts {
+    // Replaced by the island's transient modes - kept as an inert placeholder
+    // since other files still reference panels.toasts.
+    Item {
         id: toasts
 
-        anchors.bottom: sidebar.visible ? parent.bottom : utilities.top
-        anchors.right: sidebar.left
-        anchors.margins: Tokens.padding.medium
+        implicitWidth: 0
+        implicitHeight: 0
     }
 
     Sidebar.Wrapper {

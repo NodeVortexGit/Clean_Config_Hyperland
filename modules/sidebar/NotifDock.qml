@@ -43,7 +43,7 @@ Item {
             opacity: root.notifCount > 0 ? 1 : 0
 
             text: root.notifCount
-            color: Colours.palette.m3outline
+            color: DarkAccent.textMuted
             font: Tokens.font.label.large
 
             Behavior on anchors.leftMargin {
@@ -66,7 +66,7 @@ Item {
             anchors.leftMargin: Tokens.spacing.extraSmall
 
             text: root.notifCount > 0 ? qsTr("notification%1").arg(root.notifCount === 1 ? "" : "s") : qsTr("Notifications")
-            color: Colours.palette.m3outline
+            color: DarkAccent.textMuted
             font: Tokens.font.label.large
             elide: Text.ElideRight
         }
@@ -101,7 +101,7 @@ Item {
 
                     layer.enabled: true
                     layer.effect: Colouriser {
-                        colorizationColor: Colours.palette.m3outlineVariant
+                        colorizationColor: DarkAccent.border
                         brightness: 1
                     }
                 }
@@ -109,7 +109,7 @@ Item {
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
                     text: qsTr("All up to date!")
-                    color: Colours.palette.m3outlineVariant
+                    color: DarkAccent.border
                     font: Tokens.font.headline.builders.small.width(90).build()
                 }
             }
@@ -185,6 +185,8 @@ Item {
 
             icon: "clear_all"
             font: Tokens.font.icon.large
+            inactiveColour: DarkAccent.accentContainer
+            inactiveOnColour: DarkAccent.accentContainerText
             onClicked: clearTimer.start()
 
             Elevation {

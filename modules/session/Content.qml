@@ -9,74 +9,123 @@ import qs.components.controls
 import qs.services
 import qs.utils
 
-Column {
+StyledRect {
     id: root
 
     required property DrawerVisibilities visibilities
 
-    padding: Tokens.padding.large
-    rightPadding: CUtils.clamp(padding - Config.border.thickness, 0, padding)
-    spacing: Tokens.spacing.large
+    readonly property real padding: Tokens.padding.large
+    readonly property real rightPadding: CUtils.clamp(padding - Config.border.thickness, 0, padding)
 
-    SessionButton {
-        id: logout
+    radius: Tokens.rounding.large
+    color: DarkAccent.surface
+    border.width: 1
+    border.color: DarkAccent.border
 
-        icon: Config.session.icons.logout
-        command: Config.session.commands.logout
+    implicitWidth: inner.implicitWidth + padding + rightPadding
+    implicitHeight: inner.implicitHeight + padding * 2
 
-        KeyNavigation.down: shutdown
+    Column {
+        id: inner
 
-        Component.onCompleted: forceActiveFocus()
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.leftMargin: root.padding
+        anchors.topMargin: root.padding
+        anchors.bottomMargin: root.padding
 
-        Connections {
-            function onLauncherChanged(): void {
-                if (!root.visibilities.launcher)
-                    logout.forceActiveFocus();
+        spacing: Tokens.spacing.large
+
+        Group {
+            label: qsTr("Log out")
+
+            SessionButton {
+                id: logout
+
+                icon: Config.session.icons.logout
+                command: Config.session.commands.logout
+
+                KeyNavigation.down: shutdown
+
+                Component.onCompleted: forceActiveFocus()
+
+                Connections {
+                    function onLauncherChanged(): void {
+                        if (!root.visibilities.launcher)
+                            logout.forceActiveFocus();
+                    }
+
+                    target: root.visibilities
+                }
             }
+        }
 
-            target: root.visibilities
+        Group {
+            label: qsTr("Shut down")
+
+            SessionButton {
+                id: shutdown
+
+                icon: Config.session.icons.shutdown
+                command: Config.session.commands.shutdown
+
+                KeyNavigation.up: logout
+                KeyNavigation.down: hibernate
+            }
+        }
+
+        Group {
+            label: qsTr("Hibernate")
+
+            SessionButton {
+                id: hibernate
+
+                icon: Config.session.icons.hibernate
+                command: Config.session.commands.hibernate
+
+                KeyNavigation.up: shutdown
+                KeyNavigation.down: reboot
+            }
+        }
+
+        Group {
+            label: qsTr("Reboot")
+
+            SessionButton {
+                id: reboot
+
+                icon: Config.session.icons.reboot
+                command: Config.session.commands.reboot
+
+                KeyNavigation.up: hibernate
+            }
         }
     }
 
-    SessionButton {
-        id: shutdown
+    // Groups each button with a caption underneath, without touching the
+    // SessionButton's own focus/keyboard-navigation logic at all.
+    component Group: Column {
+        id: group
 
-        icon: Config.session.icons.shutdown
-        command: Config.session.commands.shutdown
+        required property string label
+        default property alias content: inner.data
 
-        KeyNavigation.up: logout
-        KeyNavigation.down: hibernate
-    }
+        spacing: Tokens.spacing.extraSmall
 
-    AnimatedImage {
-        width: Tokens.sizes.session.button
-        height: Tokens.sizes.session.button
-        sourceSize.width: width * ((QsWindow.window as QsWindow)?.devicePixelRatio ?? 1)
+        Item {
+            id: inner
 
-        playing: visible
-        asynchronous: true
-        speed: Config.general.sessionGifSpeed
-        source: Paths.absolutePath(Config.paths.sessionGif)
-        fillMode: AnimatedImage.PreserveAspectFit
-    }
+            implicitWidth: Tokens.sizes.session.button
+            implicitHeight: Tokens.sizes.session.button
+        }
 
-    SessionButton {
-        id: hibernate
-
-        icon: Config.session.icons.hibernate
-        command: Config.session.commands.hibernate
-
-        KeyNavigation.up: shutdown
-        KeyNavigation.down: reboot
-    }
-
-    SessionButton {
-        id: reboot
-
-        icon: Config.session.icons.reboot
-        command: Config.session.commands.reboot
-
-        KeyNavigation.up: hibernate
+        StyledText {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: group.label
+            color: DarkAccent.textMuted
+            font: Tokens.font.label.small
+        }
     }
 
     component SessionButton: IconButton {
@@ -87,8 +136,8 @@ Column {
         implicitWidth: Tokens.sizes.session.button
         implicitHeight: Tokens.sizes.session.button
 
-        inactiveColour: activeFocus ? Colours.palette.m3secondaryContainer : Colours.tPalette.m3surfaceContainer
-        inactiveOnColour: activeFocus ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+        inactiveColour: activeFocus ? DarkAccent.accentContainer : DarkAccent.surfaceHigh
+        inactiveOnColour: activeFocus ? DarkAccent.accentContainerText : DarkAccent.text
         radius: pressed ? Tokens.rounding.medium : activeFocus ? Tokens.rounding.extraLarge : Tokens.rounding.largeIncreased
         font: Tokens.font.icon.builders.large.scale(1.3).build()
         onClicked: Quickshell.execDetached(button.command)

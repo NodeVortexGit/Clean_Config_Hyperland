@@ -22,7 +22,7 @@ Item {
 
         y: -root.calcTopOff(hourMetrics)
         text: Time.hourStr
-        color: Colours.palette.m3primary
+        color: DarkAccent.accent
         font: Tokens.font.headline.builders.large.scale(7 * root.centerScale).width(30).build()
 
         TextMetrics {
@@ -40,7 +40,7 @@ Item {
         y: -root.calcTopOff(minuteMetrics)
 
         text: Time.minuteStr
-        color: Colours.palette.m3secondary
+        color: DarkAccent.accent
         font: Tokens.font.headline.builders.large.scale((GlobalConfig.services.useTwelveHourClock ? 3.8 : 7) * root.centerScale).width(30).build()
 
         TextMetrics {
@@ -60,7 +60,7 @@ Item {
         asynchronous: true
 
         sourceComponent: StyledRect {
-            color: Colours.tPalette.m3surfaceContainerHigh
+            color: DarkAccent.surfaceHigh
             radius: Tokens.rounding.large
 
             implicitWidth: minuteMetrics.tightBoundingRect.width
@@ -78,7 +78,7 @@ Item {
                 }
 
                 text: Time.amPmStr
-                color: Colours.palette.m3onSurface
+                color: DarkAccent.text
                 font: Tokens.font.headline.builders.small.scale(2 * root.centerScale).width(30).build()
 
                 TextMetrics {

@@ -10,6 +10,7 @@ import "modules/background"
 import "modules/areapicker"
 import "modules/lock"
 import Quickshell
+import qs.services
 
 ShellRoot {
     settings.watchFiles: true
@@ -26,6 +27,8 @@ ShellRoot {
     ConfigToasts {}
     Shortcuts {}
     BatteryMonitor {}
+    Hotplug {}
+    AutoScan {}
     IdleMonitors {
         lock: lock
     }

@@ -66,7 +66,7 @@ StyledWindow {
     name: "drawers"
     WlrLayershell.exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: (fsTransitionProg > 0 && contentItem.Config.general.showOverFullscreen) || (hasSpecialWorkspace && hasFullscreenOnNormalWs) ? WlrLayer.Overlay : WlrLayer.Top
-    WlrLayershell.keyboardFocus: visibilities.launcher || visibilities.session || Island.fullyExpanded ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: visibilities.launcher || visibilities.session || Island.fullyExpanded || Island.mode === "reply" ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     mask: hasFullscreen ? emptyRegion : regions
 
@@ -249,9 +249,6 @@ StyledWindow {
             bar: bar
             borderThickness: root.borderThickness
 
-            utilities.horizontalStretch: (sidebarBg.rawDeformMatrix.m11 - 1) / 2 + 1
-            utilities.deformMatrix: utilsBg.rawDeformMatrix
-
             dashboard.transform: Matrix4x4 {
                 matrix: dashBg.deformMatrix
             }
@@ -266,9 +263,6 @@ StyledWindow {
             }
             notifications.transform: Matrix4x4 {
                 matrix: notifsBg.deformMatrix
-            }
-            utilities.transform: Matrix4x4 {
-                matrix: utilsBg.deformMatrix
             }
             popouts.transform: Matrix4x4 {
                 matrix: popoutBg.deformMatrix

@@ -15,6 +15,44 @@ ColumnLayout {
 
     required property PopoutState popouts
 
+    // BlueZ keeps every device it has ever seen in its list, with no "is it
+    // actually nearby" flag exposed - so the panel was listing ~17 stale
+    // entries for ~3 real devices. Paired/connected ones are always shown;
+    // anything else only while discovery is actually running, and only if it
+    // has a real name (random BLE ads just use their own MAC as the name).
+    readonly property var visibleDevices: {
+        const discovering = Bluetooth.defaultAdapter?.discovering ?? false; // qmllint disable unresolved-type
+        return [...Bluetooth.devices.values].filter(d => {
+            // qmllint disable unresolved-type
+            if (d.paired || d.bonded || d.connected)
+                return true;
+            if (!discovering)
+                return false;
+            return d.name && d.name.length > 0 && !/^[0-9A-F]{2}([:-][0-9A-F]{2}){5}$/i.test(d.name);
+        }).sort((a, b) => (b.connected - a.connected) || (b.paired - a.paired) || (a.name || "").localeCompare(b.name || "")).filter((d, i, arr) => {
+            // Same physical device can appear several times under rotating
+            // BLE addresses (the Buds showed up 3x) - keep only the first
+            // entry per name, which the sort above has already made the
+            // connected/paired one.
+            return arr.findIndex(o => (o.name || o.address) === (d.name || d.address)) === i;
+        });
+    }
+
+    // Discovery runs only while this card is on screen. Without it BlueZ
+    // never refreshes, so "nearby" can't be known at all; leaving it on
+    // permanently would scan in the background forever.
+    Component.onCompleted: {
+        const adapter = Bluetooth.defaultAdapter; // qmllint disable unresolved-type
+        if (adapter?.enabled)
+            adapter.discovering = true;
+    }
+
+    Component.onDestruction: {
+        const adapter = Bluetooth.defaultAdapter; // qmllint disable unresolved-type
+        if (adapter)
+            adapter.discovering = false;
+    }
+
     width: 300
     spacing: Tokens.spacing.small
 
@@ -49,20 +87,20 @@ ColumnLayout {
         Layout.topMargin: Tokens.spacing.small
         Layout.rightMargin: Tokens.padding.extraSmall
         text: {
-            const devices = Bluetooth.devices.values; // qmllint disable unresolved-type
+            const devices = root.visibleDevices;
             let available = qsTr("%1 device%2 available").arg(devices.length).arg(devices.length === 1 ? "" : "s");
             const connected = devices.filter(d => d.connected).length;
             if (connected > 0)
                 available += qsTr(" (%1 connected)").arg(connected);
             return available;
         }
-        color: Colours.palette.m3onSurfaceVariant
+        color: DarkAccent.textMuted
         font: Tokens.font.body.small
     }
 
     Repeater {
         model: ScriptModel {
-            values: [...Bluetooth.devices.values].sort((a, b) => (b.connected - a.connected) || (b.paired - a.paired) || (a.name || "").localeCompare(b.name || "")).slice(0, 5) // qmllint disable unresolved-type
+            values: root.visibleDevices.slice(0, 5)
         }
 
         RowLayout {
@@ -108,7 +146,7 @@ ColumnLayout {
             MaterialIcon {
                 visible: device.modelData.state === BluetoothDeviceState.Connected  // qmllint disable unresolved-type
                 text: device.modelData.batteryAvailable ? Icons.getBatteryIcon(device.modelData.battery) : "battery_alert"
-                color: device.modelData.batteryAvailable && device.modelData.battery < 0.2 ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
+                color: device.modelData.batteryAvailable && device.modelData.battery < 0.2 ? Colours.palette.m3error : DarkAccent.textMuted
             }
 
             StyledRect {
@@ -118,7 +156,7 @@ ColumnLayout {
                 implicitHeight: connectIcon.implicitHeight + Tokens.padding.extraSmall
 
                 radius: Tokens.rounding.full
-                color: Qt.alpha(Colours.palette.m3primary, device.modelData.state === BluetoothDeviceState.Connected ? 1 : 0) // qmllint disable unresolved-type
+                color: Qt.alpha(DarkAccent.accent, device.modelData.state === BluetoothDeviceState.Connected ? 1 : 0) // qmllint disable unresolved-type
 
                 CircularIndicator {
                     anchors.fill: parent
@@ -126,7 +164,7 @@ ColumnLayout {
                 }
 
                 StateLayer {
-                    color: device.modelData.state === BluetoothDeviceState.Connected ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface // qmllint disable unresolved-type
+                    color: DarkAccent.text // qmllint disable unresolved-type
                     disabled: device.loading
                     onClicked: device.modelData.connected = !device.modelData.connected
                 }
@@ -137,7 +175,7 @@ ColumnLayout {
                     anchors.centerIn: parent
                     animate: true
                     text: device.modelData.connected ? "link_off" : "link"
-                    color: device.modelData.state === BluetoothDeviceState.Connected ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface // qmllint disable unresolved-type
+                    color: DarkAccent.text // qmllint disable unresolved-type
 
                     opacity: device.loading ? 0 : 1
 
@@ -171,17 +209,9 @@ ColumnLayout {
         }
     }
 
-    IconTextButton {
-        Layout.fillWidth: true
-        Layout.topMargin: Tokens.spacing.medium
-        inactiveColour: Colours.palette.m3primaryContainer
-        inactiveOnColour: Colours.palette.m3onPrimaryContainer
-        verticalPadding: Tokens.padding.extraSmall
-        text: qsTr("Open settings")
-        icon: "settings"
-
-        onClicked: root.popouts.detachRequested("bluetooth")
-    }
+    // Discovery toggle lives as a small pinned button on the card itself (see
+    // FullScreen.qml) instead of flowing here - a long device list would
+    // otherwise clip it out of reach.
 
     component Toggle: RowLayout {
         required property string label
@@ -199,6 +229,8 @@ ColumnLayout {
 
         StyledSwitch {
             id: toggle
+            accentColour: DarkAccent.accent
+            accentOnColour: DarkAccent.bg
         }
     }
 }
