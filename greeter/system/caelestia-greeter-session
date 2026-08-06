@@ -1,0 +1,29 @@
+#!/bin/bash
+# Launched by greetd as the `greetd` user. Starts a throwaway Hyprland whose
+# only client is the greeter shell.
+
+# Everything this session prints goes somewhere that outlives the session -
+# the runtime dir is torn down the instant the greeter exits.
+exec >>/var/log/greetd-greeter.log 2>&1
+echo "=== greeter session starting $(date -Is) uid=$(id -u) groups=$(id -Gn) ==="
+
+# greetd does not propagate XDG_RUNTIME_DIR from PAM; Hyprland aborts without
+# it. /run/greetd is created by /etc/tmpfiles.d/greetd-runtime.conf.
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/greetd}"
+
+export XDG_CONFIG_HOME=/var/lib/greetd/.config
+export XDG_STATE_HOME=/var/lib/greetd/.local/state
+export XDG_CACHE_HOME=/var/lib/greetd/.cache
+
+export XDG_CURRENT_DESKTOP=Hyprland
+export QT_QPA_PLATFORM=wayland
+
+# Consumed by GreeterInfo.qml.
+export GREETER_USER=nodevortex
+export GREETER_SESSION=Hyprland
+export GREETER_ASSETS=/usr/share/caelestia-greeter/assets/greeter
+
+echo "XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-<unset>}  XDG_VTNR=${XDG_VTNR:-<unset>}"
+echo "dri: $(ls -l /dev/dri/card* 2>&1 | tr '\n' ' ')"
+
+exec Hyprland -c /etc/greetd/hyprland-greeter.conf

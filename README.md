@@ -56,6 +56,17 @@ brightness (left) / volume (right) sliders.
   Repeat failures add another impulse.
 - **The correct password** floats everything back into place, then unlocks.
 
+### Login screen
+
+The lock screen also runs as the *login* screen, via
+[greetd](https://sr.ht/~kennylevinsen/greetd) — same clock, avatar, password
+field, sliders and physics, plus a session picker, an account picker and power
+controls. Volume goes through ALSA there, since the greeter runs as `greetd`
+and has no sound server.
+
+See [greeter/README.md](greeter/README.md) for how it works and how to install
+it. It does not replace your display manager until you explicitly enable it.
+
 ### Elsewhere
 
 - Notification centre restyled to match; the pill is the only popup surface

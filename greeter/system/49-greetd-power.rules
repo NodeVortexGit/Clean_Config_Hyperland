@@ -1,0 +1,20 @@
+// Let the login screen offer shutdown / reboot / suspend.
+// Scoped to the greetd user and to exactly those three login1 actions; the
+// *-multiple-sessions variants are needed because the user's session may still
+// be logged in when the greeter is shown.
+polkit.addRule(function(action, subject) {
+    if (subject.user !== "greetd")
+        return undefined;
+
+    var allowed = [
+        "org.freedesktop.login1.power-off",
+        "org.freedesktop.login1.power-off-multiple-sessions",
+        "org.freedesktop.login1.reboot",
+        "org.freedesktop.login1.reboot-multiple-sessions",
+        "org.freedesktop.login1.suspend",
+        "org.freedesktop.login1.suspend-multiple-sessions"
+    ];
+
+    if (allowed.indexOf(action.id) !== -1)
+        return polkit.Result.YES;
+});
