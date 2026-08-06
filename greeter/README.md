@@ -123,8 +123,25 @@ dracut -f --regenerate-all
 ```
 
 Size the swapfile at least as large as RAM. The change only takes effect after a
-reboot: until the kernel is booted with `resume=`, `CanHibernate` reports `na`
-and the button cannot work.
+reboot: until the kernel is booted with `resume=`, `CanHibernate` reports `na`.
+
+Two further things will block it even once all of the above is right:
+
+- **The sleep targets may be masked.** `systemctl unmask sleep.target
+  suspend.target hibernate.target hybrid-sleep.target`. While masked,
+  `CanHibernate` fails with `AccessDenied` no matter how the swap is set up.
+- **SELinux must be able to reach the swapfile.** A freshly created `/swap`
+  subvolume is *unlabelled*, so logind cannot traverse it, and the failure
+  surfaces as `AccessDenied` from a process running as root:
+
+  ```sh
+  semanage fcontext -a -t root_t /swap
+  restorecon -Rv /swap
+  ```
+
+  logind's own debug log is what identifies this — `systemctl
+  service-log-level systemd-logind debug` then look for
+  `Failed to get devno and offset for swap`.
 
 ## Layout
 

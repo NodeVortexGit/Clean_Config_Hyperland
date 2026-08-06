@@ -562,6 +562,10 @@ Item {
 
         readonly property bool multi: Users.users.length > 1
         property bool open: false
+        property point menuAnchor: Qt.point(0, 0)
+
+        onOpenChanged: if (open)
+            menuAnchor = upill.mapToItem(shaken, 0, 0)
 
         implicitWidth: multi ? bg.implicitWidth : plain.implicitWidth
         implicitHeight: multi ? bg.implicitHeight : plain.implicitHeight
@@ -633,10 +637,13 @@ Item {
         StyledRect {
             id: uMenu
 
+            // Same reason as the session menu: parented to the card so its
+            // entries are actually clickable.
+            parent: shaken
             visible: upill.open
-            anchors.top: bg.bottom
-            anchors.topMargin: Tokens.spacing.small
-            anchors.horizontalCenter: parent.horizontalCenter
+            z: 200
+            x: upill.menuAnchor.x + (upill.width - width) / 2
+            y: upill.menuAnchor.y + upill.height + Tokens.spacing.small
 
             implicitWidth: Math.max(bg.implicitWidth, 260 * root.centerScale)
             implicitHeight: Math.min(uList.contentHeight, 190 * root.centerScale) + Tokens.padding.small * 2
@@ -737,6 +744,13 @@ Item {
         id: pill
 
         property bool open: false
+        // Where the menu should sit, in card coordinates. Recomputed on open;
+        // the pill is always at rest then, because opening is impossible while
+        // the physics is running.
+        property point menuAnchor: Qt.point(0, 0)
+
+        onOpenChanged: if (open)
+            menuAnchor = pill.mapToItem(shaken, 0, 0)
 
         implicitWidth: pillRow.implicitWidth + Tokens.padding.large * 2
         implicitHeight: pillRow.implicitHeight + Tokens.padding.small * 2
@@ -796,10 +810,15 @@ Item {
         StyledRect {
             id: menu
 
+            // Parented to the card rather than to the pill. The menu extends
+            // well outside the pill's PhysicsBody, and Qt will not deliver a
+            // click into a parent that does not contain the point - so entries
+            // rendered fine but could never be selected.
+            parent: shaken
             visible: pill.open
-            anchors.bottom: pill.top
-            anchors.bottomMargin: Tokens.spacing.small
-            anchors.horizontalCenter: pill.horizontalCenter
+            z: 200
+            x: pill.menuAnchor.x + (pill.width - width) / 2
+            y: pill.menuAnchor.y - height - Tokens.spacing.small
 
             implicitWidth: Math.max(pill.implicitWidth, 260 * root.centerScale)
             // Cap the height so a long session list scrolls instead of growing
@@ -908,9 +927,6 @@ Item {
         // a handler. Optional so the session switch can use the latter.
         property var action: []
         property bool danger: false
-        property bool armed: false
-        // Skips the arm/confirm step, for actions that aren't destructive.
-        property bool instant: false
 
         signal activated
 
@@ -918,7 +934,7 @@ Item {
         implicitHeight: 40
         radius: Tokens.rounding.full
 
-        color: armed ? (danger ? Colours.palette.m3error : DarkAccent.accent) : pbMouse.containsMouse ? DarkAccent.surfaceHigh : DarkAccent.surface
+        color: pbMouse.pressed ? (danger ? Colours.palette.m3error : DarkAccent.accent) : pbMouse.containsMouse ? DarkAccent.surfaceHigh : DarkAccent.surface
 
         Behavior on color {
             CAnim {}
@@ -927,19 +943,12 @@ Item {
         MaterialIcon {
             anchors.centerIn: parent
             text: pb.icon
-            color: pb.armed ? DarkAccent.bg : DarkAccent.textMuted
+            color: pbMouse.pressed ? DarkAccent.bg : DarkAccent.textMuted
             fontStyle: Tokens.font.icon.builders.small.build()
 
             Behavior on color {
                 CAnim {}
             }
-        }
-
-        Timer {
-            id: disarm
-
-            interval: 2500
-            onTriggered: pb.armed = false
         }
 
         MouseArea {
@@ -948,22 +957,15 @@ Item {
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
+            // One press, one action. The arm-then-confirm step was there to
+            // stop an accidental shutdown, but it reads as a dead button:
+            // the first press only changed a colour, so nothing appeared to
+            // happen at all.
             onClicked: {
-                if (pb.instant) {
+                if (pb.action.length > 0)
+                    Quickshell.execDetached(pb.action);
+                else
                     pb.activated();
-                    return;
-                }
-
-                if (pb.armed) {
-                    disarm.stop();
-                    if (pb.action.length > 0)
-                        Quickshell.execDetached(pb.action);
-                    else
-                        pb.activated();
-                } else {
-                    pb.armed = true;
-                    disarm.restart();
-                }
             }
         }
     }
