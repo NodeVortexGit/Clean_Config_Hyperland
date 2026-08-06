@@ -11,7 +11,11 @@ Scope {
     id: root
 
     required property Lock lock
-    readonly property bool enabled: !GlobalConfig.general.idle.inhibitWhenAudio || !Players.list.some(p => p.isPlaying)
+    // SessionInhibit covers what the compositor and MPRIS both miss: controller
+    // input, which never resets the Wayland idle timer, and audio from games or
+    // Proton titles, which publish no MPRIS player. The original MPRIS clause is
+    // kept as-is so the existing inhibitWhenAudio setting still behaves.
+    readonly property bool enabled: !SessionInhibit.inhibited && (!GlobalConfig.general.idle.inhibitWhenAudio || !Players.list.some(p => p.isPlaying))
 
     function handleIdleAction(action: var): void {
         if (!action)

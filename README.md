@@ -56,6 +56,29 @@ brightness (left) / volume (right) sliders.
   Repeat failures add another impulse.
 - **The correct password** floats everything back into place, then unlocks.
 
+### Staying awake while in use
+
+The session no longer dims or locks while you are actually using it in two cases
+the compositor cannot detect on its own.
+
+**Controller input.** Wayland resets the idle timer on keyboard, pointer and
+touch only — a gamepad is just another evdev device, so an hour of gaming reads
+as an hour of sitting still. `assets/gamepad-watch.py` watches the joystick
+devices directly. Analog sticks drift constantly, so button events count
+unconditionally while stick movement only counts past a deadzone; otherwise the
+machine would simply never idle again. Devices are found through udev's
+`ID_INPUT_JOYSTICK` tag rather than the `by-id` symlinks, because those are a USB
+convention and a Bluetooth controller gets none.
+
+**Game and Proton audio.** The shell already inhibited while an MPRIS player was
+playing, but games publish no MPRIS player, so the check missed exactly the thing
+most likely to run for hours without a keypress. `SessionInhibit` counts uncorked
+PipeWire streams instead, which catches anything actually producing sound and
+still ignores a paused player.
+
+Idle resumes 3 minutes after the last controller event (`gamepadGraceSec`), so
+walking away still locks.
+
 ### Login screen
 
 The lock screen also runs as the *login* screen, via
