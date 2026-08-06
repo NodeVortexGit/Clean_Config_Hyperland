@@ -90,10 +90,41 @@ Each of these was a failure that took a boot or a VT test to find.
   home directory is mode 700. Material Symbols renders as tofu boxes.
 - **The backlight needs a udev rule.** `brightnessctl` goes through logind's
   `SetBrightness`, which needs an active seat session.
+- **greetd gives the greeter no `PATH`.** Anything it execs must be an absolute
+  path, or the button appears to do nothing: the click lands, `execDetached`
+  fires, and the binary is never found.
+- **Hibernate needs disk-backed swap.** zram cannot hold a hibernation image, so
+  `CanHibernate` reports `na` until a real swapfile exists, is named by
+  `resume=`/`resume_offset=` on the kernel command line, and the initramfs
+  carries the `resume` module. See below.
 - **Physics bodies must reparent onto the card while displaced.** Moving a body
   *within* its layout slot — by `transform` or by `x`/`y` — renders correctly
   but cannot be clicked: Qt only descends into a parent that contains the point,
   so a button lying at the bottom of the pile keeps its hit area up in the row.
+
+## Hibernate
+
+The hibernate button needs disk-backed swap; zram is not enough, since it lives
+in the memory being saved. On btrfs:
+
+```sh
+btrfs subvolume create /swap                      # own subvolume: never snapshotted
+btrfs filesystem mkswapfile --size 16g --uuid clear /swap/swapfile
+semanage fcontext -a -t swapfile_t /swap/swapfile && restorecon /swap/swapfile
+swapon /swap/swapfile
+echo '/swap/swapfile none swap defaults 0 0' >> /etc/fstab
+
+grubby --update-kernel=ALL \
+  --args="resume=UUID=$(findmnt -no UUID /) \
+          resume_offset=$(btrfs inspect-internal map-swapfile -r /swap/swapfile)"
+
+echo 'add_dracutmodules+=" resume "' > /etc/dracut.conf.d/resume.conf
+dracut -f --regenerate-all
+```
+
+Size the swapfile at least as large as RAM. The change only takes effect after a
+reboot: until the kernel is booted with `resume=`, `CanHibernate` reports `na`
+and the button cannot work.
 
 ## Layout
 

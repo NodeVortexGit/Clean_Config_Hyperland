@@ -11,6 +11,9 @@ echo "=== greeter session starting $(date -Is) uid=$(id -u) groups=$(id -Gn) ===
 # it. /run/greetd is created by /etc/tmpfiles.d/greetd-runtime.conf.
 export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/greetd}"
 
+# greetd provides no PATH; anything the greeter execs must otherwise be absolute.
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
+
 export XDG_CONFIG_HOME=/var/lib/greetd/.config
 export XDG_STATE_HOME=/var/lib/greetd/.local/state
 export XDG_CACHE_HOME=/var/lib/greetd/.cache

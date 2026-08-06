@@ -446,7 +446,7 @@ Item {
 
                     PowerButton {
                         icon: "power_settings_new"
-                        action: ["systemctl", "poweroff"]
+                        action: ["/usr/bin/systemctl", "poweroff"]
                         danger: true
                     }
                 }
@@ -456,7 +456,7 @@ Item {
 
                     PowerButton {
                         icon: "restart_alt"
-                        action: ["systemctl", "reboot"]
+                        action: ["/usr/bin/systemctl", "reboot"]
                         danger: true
                     }
                 }
@@ -465,8 +465,9 @@ Item {
                     dropZ: 60
 
                     PowerButton {
-                        icon: "bedtime"
-                        action: ["systemctl", "suspend"]
+                        icon: "downloading"
+                        action: ["/usr/bin/systemctl", "hibernate"]
+                        danger: true
                     }
                 }
             }
@@ -892,6 +893,10 @@ Item {
     }
 
 
+    // Commands are absolute: greetd hands the greeter an environment with no
+    // PATH, so a bare "systemctl" simply fails to resolve and the button
+    // appears to do nothing at all.
+    //
     // Two-step: the first press arms, the second commits. Everything else on
     // this screen is recoverable; powering the machine off from under someone
     // mid-password is not.
