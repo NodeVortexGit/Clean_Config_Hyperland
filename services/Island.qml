@@ -131,6 +131,22 @@ Singleton {
         transientTimer.restart();
     }
 
+    // Keyboard layout ("language") switches get their own Live Activity-style
+    // flash - "from" the old layout "to" the new one - instead of just the
+    // toast Hypr.qml already fires, so it's visible without the sidebar open.
+    property string languageFrom: ""
+    property string languageTo: ""
+
+    function flashLanguage(from: string, to: string): void {
+        if (transientMode === "notification" || transientMode === "reply")
+            return;
+        languageFrom = from;
+        languageTo = to;
+        transientMode = "language";
+        transientTimer.interval = 1800;
+        transientTimer.restart();
+    }
+
     function flashCharging(): void {
         transientMode = "charging";
         transientTimer.interval = 3000;
@@ -266,8 +282,21 @@ Singleton {
             root.flashWorkspace();
         }
 
+        function onKbLayoutChanged() {
+            const to = Hypr.kbLayout;
+            const from = root._lastKbLayout;
+            root._lastKbLayout = to;
+            if (!from || !to || from === to || from === "??" || to === "??")
+                return;
+            root.flashLanguage(from, to);
+        }
+
         target: Hypr
     }
+
+    // Seeded once Hypr has resolved a real layout, so the very first switch
+    // has a correct "from" instead of flashing empty -> language.
+    property string _lastKbLayout: ""
 
     Connections {
         function onMutedChanged(): void {
@@ -323,7 +352,10 @@ Singleton {
         }
     }
 
-    Component.onCompleted: root.checkLowBattery()
+    Component.onCompleted: {
+        root.checkLowBattery();
+        root._lastKbLayout = Hypr.kbLayout;
+    }
 
     Connections {
         function onPercentageChanged(): void {

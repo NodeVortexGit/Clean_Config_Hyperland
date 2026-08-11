@@ -366,6 +366,8 @@ Item {
                             return volumeView;
                         if (displayMode === "brightness")
                             return brightnessView;
+                        if (displayMode === "language")
+                            return languageView;
                         if (displayMode === "charging")
                             return chargingView;
                         if (displayMode === "unplugged")
@@ -658,6 +660,107 @@ Item {
 
                     Behavior on width {
                         Anim {}
+                    }
+                }
+            }
+        }
+    }
+
+    // "Live Activity" style badge for keyboard layout switches: the old
+    // layout sits dimmed and static, the arrow gives a small compress/release
+    // impulse, and the new layout pops in with a bounce - reads as motion
+    // from -> to instead of just a value swap. Re-triggers on every switch
+    // even while the pill is already showing "language" (mode itself doesn't
+    // change, so this can't rely on the Loader re-instantiating the view).
+    Component {
+        id: languageView
+
+        RowLayout {
+            id: languageRow
+
+            spacing: Tokens.spacing.small
+
+            MaterialIcon {
+                text: "translate"
+                color: DarkAccent.accent
+            }
+
+            StyledText {
+                text: Island.languageFrom.toUpperCase()
+                font: Tokens.font.mono.medium
+                color: Colours.palette.m3onSurfaceVariant
+                opacity: 0.55
+            }
+
+            MaterialIcon {
+                id: arrowIcon
+
+                text: "arrow_right_alt"
+                color: Colours.palette.m3onSurfaceVariant
+            }
+
+            StyledText {
+                id: toText
+
+                text: Island.languageTo.toUpperCase()
+                font: Tokens.font.mono.builders.medium.weight(Font.Bold).build()
+                color: DarkAccent.accent
+            }
+
+            Connections {
+                function onLanguageToChanged(): void {
+                    swap.restart();
+                }
+
+                target: Island
+            }
+
+            SequentialAnimation {
+                id: swap
+
+                running: true
+
+                ParallelAnimation {
+                    NumberAnimation {
+                        target: arrowIcon
+                        property: "scale"
+                        to: 0.7
+                        duration: 70
+                    }
+                    NumberAnimation {
+                        target: toText
+                        property: "opacity"
+                        to: 0.0
+                        duration: 60
+                    }
+                    NumberAnimation {
+                        target: toText
+                        property: "scale"
+                        to: 0.6
+                        duration: 60
+                    }
+                }
+                ParallelAnimation {
+                    NumberAnimation {
+                        target: arrowIcon
+                        property: "scale"
+                        to: 1.0
+                        duration: 220
+                        easing.type: Easing.OutBack
+                    }
+                    NumberAnimation {
+                        target: toText
+                        property: "opacity"
+                        to: 1.0
+                        duration: 160
+                        easing.type: Easing.OutCubic
+                    }
+                    NumberAnimation {
+                        target: toText
+                        property: "scale"
+                        to: 1.0
+                        duration: 260
+                        easing.type: Easing.OutBack
                     }
                 }
             }
