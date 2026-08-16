@@ -207,7 +207,9 @@ Item {
         // The expanded quick-settings/power surface goes for a fixed blackish
         // dark-blue theme (DarkAccent) instead of the wallpaper-derived M3
         // colour; the compact idle pill keeps its original frosted glass look.
-        color: root.fullyExpanded ? DarkAccent.bg : Qt.alpha(Colours.tPalette.m3surfaceContainer, Colours.tPalette.m3surfaceContainer.a)
+        // A notification gets a solid black backing instead of that glass
+        // look, so it reads clearly instead of blending into the wallpaper.
+        color: root.fullyExpanded ? DarkAccent.bg : root.mode === "notification" ? "black" : Qt.alpha(Colours.tPalette.m3surfaceContainer, Colours.tPalette.m3surfaceContainer.a)
         border.width: 1
         border.color: root.fullyExpanded ? DarkAccent.border : Qt.alpha(Colours.palette.m3onSurface, 0.08)
 
@@ -252,7 +254,12 @@ Item {
 
         MouseArea {
             anchors.fill: parent
+            hoverEnabled: true
             acceptedButtons: Qt.LeftButton | Qt.RightButton
+            // No-ops unless the pill is actually showing a notification -
+            // see Island.pauseNotifDismiss().
+            onEntered: Island.pauseNotifDismiss()
+            onExited: Island.resumeOrDismissNotifDismiss()
             onClicked: mouse => {
                 if (mouse.button === Qt.RightButton)
                     Island.cycleRestingMode();

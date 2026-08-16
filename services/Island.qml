@@ -81,7 +81,60 @@ Singleton {
             transientMode = "notification";
         }
         transientTimer.interval = 5000;
+        _notifExpiresAt = Date.now() + transientTimer.interval;
         transientTimer.restart();
+    }
+
+    // Hovering the pill while it's showing an incoming notification
+    // suppresses the auto-dismiss instead of ignoring it, so reading one
+    // never gets cut off. The notification still has a fixed expiry instant
+    // set when it first appeared though - leaving the pill only checks
+    // whether that instant has already passed: if so it's dropped
+    // immediately, otherwise the timer just resumes ticking towards that
+    // same original deadline (NOT a fresh interval - Timer.interval is a
+    // static configured duration, it never reflects time already elapsed,
+    // so re-reading it here would silently grant a full new interval on
+    // every hover/unhover instead of ever actually expiring).
+    // No-ops outside "notification" mode - "reply" already has its own
+    // hold-open logic (see holdReply), and other transients (volume etc.)
+    // were never asked to pause on hover.
+    property real _notifExpiresAt: 0
+
+    function pauseNotifDismiss(): void {
+        if (transientMode !== "notification")
+            return;
+        transientTimer.stop();
+        // Each NotifData also owns its own independent timer, which is what
+        // actually sets popup = false (dropping it out of Notifs.popups and
+        // blanking the pill's text/icon, even while the pill itself stays
+        // paused) - pause that too, or it fires on schedule regardless of
+        // hover and leaves an empty pill behind.
+        (Notifs.popups[0] ?? null)?.timer.stop();
+    }
+
+    function resumeOrDismissNotifDismiss(): void {
+        if (transientMode !== "notification")
+            return;
+
+        const remaining = _notifExpiresAt - Date.now();
+        const n = Notifs.popups[0] ?? null;
+
+        if (remaining <= 0) {
+            dismissTransient();
+            if (n)
+                n.popup = false;
+            return;
+        }
+
+        transientTimer.interval = remaining;
+        transientTimer.restart();
+
+        // Keep the notification's own dismiss in lockstep with the pill's -
+        // same deadline, same "not a fresh interval" reasoning as above.
+        if (n) {
+            n.timer.interval = remaining;
+            n.timer.restart();
+        }
     }
 
     function holdReply(held: bool): void {
