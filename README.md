@@ -119,6 +119,27 @@ The Hyprland keybinds referenced above (`Meta+L` to lock, volume keys capped at
 100%, brightness routed through the shell) live in `~/.config/hypr/hyprland.conf`
 and are not part of this repo.
 
+Running [`finish-install.sh`](finish-install.sh) handles all of the above end
+to end — deps, the AUR helper, the shell build/install — and also builds and
+installs [`fetch`](https://github.com/areofyl/fetch) (a small, single-author
+fastfetch companion that spins your distro logo in 3D) to `~/.local/bin/fetch`.
+
+### fetch
+
+[areofyl/fetch](https://github.com/areofyl/fetch) reuses fastfetch's distro
+logos but renders them as a live-rotating 3D point cloud next to your system
+info. It's pulled in automatically by `finish-install.sh`; to install it on
+its own instead:
+
+```sh
+git clone https://github.com/areofyl/fetch.git
+cd fetch
+make
+PREFIX="$HOME/.local" make install   # or `sudo make install` for a system-wide install
+```
+
+Run it with `fetch`; any keypress or Ctrl-C stops the animation.
+
 ## Licence
 
 **GPL-3.0**, inherited from upstream — see [LICENSE](LICENSE). This is a
