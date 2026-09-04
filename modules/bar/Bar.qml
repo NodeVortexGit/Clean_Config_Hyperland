@@ -158,9 +158,11 @@ Item {
             return;
         const specialWs = Hypr.focusedMonitor?.lastIpcObject.specialWorkspace.name;
         if (specialWs?.length > 0)
-            Hypr.dispatch(`togglespecialworkspace ${specialWs.slice(8)}`);
+            Hypr.dispatch(Hypr.usingLua ? `hl.dsp.workspace.toggle_special("${specialWs.slice(8)}")` : `togglespecialworkspace ${specialWs.slice(8)}`);
         else if (angleDelta.y < 0 || Hypr.activeWsId > 1)
-            Hypr.dispatch(`workspace r${angleDelta.y > 0 ? "-" : "+"}1`);
+            // Lua parser needs the hl.dsp.* form; plain "workspace r±1" errors.
+            // Scroll DOWN -> next (1->10), scroll UP -> previous (10->1).
+            Hypr.dispatch(Hypr.usingLua ? `hl.dsp.focus({ workspace = "r${angleDelta.y > 0 ? "-" : "+"}1" })` : `workspace r${angleDelta.y > 0 ? "-" : "+"}1`);
     }
 
     function fmtMmSs(secs: int): string {
@@ -179,11 +181,11 @@ Item {
             // The pill is showing what's playing, so a tap opens the player.
             Island.toggleFullyExpanded();
         } else {
-            // Anything else (idle/normal, timer, transients) opens the quick
-            // panel, same as the Meta-key shortcut. toggleQuickPanel() also
-            // drops any stuck/looping transient before opening, so the pill
-            // can never become permanently untappable.
-            Island.toggleQuickPanel();
+            // Idle/normal/timer/transient: expand the pill into its default
+            // (media/live) view rather than force-opening the settings grid
+            // "drop down menu". toggleFullyExpanded() still drops any stuck
+            // transient first, so the pill can never become untappable.
+            Island.toggleFullyExpanded();
         }
     }
 

@@ -16,7 +16,13 @@ Item {
     required property BarPopouts.Wrapper popouts
     required property bool fullscreen
 
-    readonly property bool disabled: Strings.testRegexList(Config.bar.excludedScreens, screen.name)
+    // The island lives on ONE screen -- Screens.mainScreen (the built-in laptop
+    // panel when present, else the first enabled screen). It STAYS THERE and does
+    // NOT follow the cursor/focus -- following focus made it vanish from the main
+    // display the moment the cursor crossed to the other screen. Reactive only to
+    // hotplug/lid (main screen changes), never to focus. Still honours
+    // excludedScreens.
+    readonly property bool disabled: Strings.testRegexList(Config.bar.excludedScreens, screen.name) || (!!Screens.mainScreen && screen.name !== Screens.mainScreen.name)
 
     readonly property int padding: Math.max(Tokens.padding.small, Config.border.thickness)
     readonly property int compactHeight: Tokens.sizes.bar.innerWidth + padding * 2

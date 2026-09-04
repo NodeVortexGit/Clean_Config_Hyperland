@@ -143,7 +143,7 @@ CustomMouseArea {
                     Rectangle {
                         visible: dayItem.model.today
                         anchors.centerIn: parent
-                        width: Math.max(parent.width, parent.height) - Tokens.padding.medium
+                        width: Math.max(text.implicitWidth, text.implicitHeight) + Tokens.padding.small * 2
                         height: width
                         radius: width / 2
                         color: DarkAccent.accent
@@ -169,10 +169,12 @@ CustomMouseArea {
                     // be greyed out and skipped entirely.
                     MaterialIcon {
                         visible: dayItem.isPast
-                        anchors.centerIn: parent
+                        anchors.fill: parent
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
                         text: "close"
                         color: DarkAccent.accent
-                        fontStyle: Tokens.font.icon.builders.small.scale(1.4).weight(Font.Bold).build()
+                        fontStyle: Tokens.font.icon.builders.small.scale(1.2).build()
                     }
                 }
             }

@@ -26,7 +26,10 @@ Singleton {
 
     function getMonitor(query: string): var {
         if (query === "active") {
-            return monitors.find(m => Hypr.monitorFor(m.modelData)?.focused); // qmllint disable missing-property
+            // Fall back to the first monitor when no focused one is resolved
+            // (single-display laptops, or before Hypr has reported focus) so
+            // brightnessMonitor is never undefined -> the brightness OSD can fire.
+            return monitors.find(m => Hypr.monitorFor(m.modelData)?.focused) ?? monitors[0]; // qmllint disable missing-property
         }
 
         if (query.startsWith("model:")) {

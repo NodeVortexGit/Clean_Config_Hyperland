@@ -20,9 +20,14 @@ RowLayout {
                 return;
             const specialWs = Hypr.focusedMonitor?.lastIpcObject.specialWorkspace.name;
             if (specialWs?.length > 0)
-                Hypr.dispatch(`togglespecialworkspace ${specialWs.slice(8)}`);
+                Hypr.dispatch(Hypr.usingLua ? `hl.dsp.workspace.toggle_special("${specialWs.slice(8)}")` : `togglespecialworkspace ${specialWs.slice(8)}`);
             else if (event.angleDelta.y < 0 || Hypr.activeWsId > 1)
-                Hypr.dispatch(`workspace r${event.angleDelta.y > 0 ? "-" : "+"}1`);
+                // Scroll DOWN (angleDelta.y < 0) -> next workspace (1 -> 10);
+                // scroll UP (y > 0) -> previous (10 -> 1). MUST use the hl.dsp.*
+                // form under the Lua config parser -- the plain "workspace r±1"
+                // dispatch errors there ("')' expected near 'r'"), which is why
+                // scrolling the workspace icons did nothing.
+                Hypr.dispatch(Hypr.usingLua ? `hl.dsp.focus({ workspace = "r${event.angleDelta.y > 0 ? "-" : "+"}1" })` : `workspace r${event.angleDelta.y > 0 ? "-" : "+"}1`);
         }
     }
 

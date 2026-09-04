@@ -41,33 +41,38 @@ Singleton {
     property bool _initialized: false
 
     function formatBytes(bytes: real): var {
-        // Handle negative or invalid values
-        if (bytes < 0 || isNaN(bytes) || !isFinite(bytes)) {
+        // Network *speed* is shown in bits/s (Mbps etc., the way NICs and ISPs
+        // rate links), not bytes/s. Convert bytes->bits (x8) and use decimal
+        // (1000) steps, which is the convention for bit-rate units.
+        // (Data *totals* still use bytes via formatBytesTotal below.)
+        const bits = bytes * 8;
+
+        if (bits < 0 || isNaN(bits) || !isFinite(bits)) {
             return {
                 value: 0,
-                unit: "B/s"
+                unit: "bps"
             };
         }
 
-        if (bytes < 1024) {
+        if (bits < 1000) {
             return {
-                value: bytes,
-                unit: "B/s"
+                value: bits,
+                unit: "bps"
             };
-        } else if (bytes < 1024 * 1024) {
+        } else if (bits < 1000 * 1000) {
             return {
-                value: bytes / 1024,
-                unit: "KB/s"
+                value: bits / 1000,
+                unit: "Kbps"
             };
-        } else if (bytes < 1024 * 1024 * 1024) {
+        } else if (bits < 1000 * 1000 * 1000) {
             return {
-                value: bytes / (1024 * 1024),
-                unit: "MB/s"
+                value: bits / (1000 * 1000),
+                unit: "Mbps"
             };
         } else {
             return {
-                value: bytes / (1024 * 1024 * 1024),
-                unit: "GB/s"
+                value: bits / (1000 * 1000 * 1000),
+                unit: "Gbps"
             };
         }
     }

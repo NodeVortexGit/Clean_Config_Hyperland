@@ -61,6 +61,17 @@ Singleton {
     }
 
     function setAudioSink(newSink: PwNode): void {
+        // SAFETY: an output switch must NEVER jump the volume up. caelestia
+        // otherwise just changes the default sink, so moving to a sink that
+        // happens to sit at 100% would instantly blast at full volume -- lethal
+        // with a maxed-out TV/receiver where the software volume is the only
+        // thing keeping it quiet. So first carry the CURRENT sink's volume onto
+        // the target (hard-capped at 0.6 as a backstop), making a switch
+        // volume-neutral, THEN change the default. All sinks are bound by the
+        // PwObjectTracker below, so newSink.audio is writable here. Mute state is
+        // left untouched (a muted target stays silent -- also safe).
+        if (newSink?.audio && newSink.id !== sink?.id)
+            newSink.audio.volume = Math.min(root.volume, 0.6);
         Pipewire.preferredDefaultAudioSink = newSink;
     }
 
