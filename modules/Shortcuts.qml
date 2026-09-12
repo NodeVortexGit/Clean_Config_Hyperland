@@ -85,6 +85,19 @@ Scope {
     // qmllint disable unresolved-type
     CustomShortcut {
         // qmllint enable unresolved-type
+        name: "islandToggle"
+        description: "Toggle the island's expanded view"
+        onPressed: root.launcherInterrupted = false
+        onReleased: {
+            if (!root.launcherInterrupted && !root.hasFullscreen)
+                Island.toggleFullyExpanded();
+            root.launcherInterrupted = false;
+        }
+    }
+
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
         name: "sidebar"
         description: "Toggle sidebar"
         onPressed: {

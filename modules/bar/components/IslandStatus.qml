@@ -32,6 +32,6 @@ RowLayout {
         visible: Config.bar.status.showBattery && UPower.displayDevice.isLaptopBattery
         fill: 1
         text: Icons.getBatteryIcon(UPower.displayDevice.percentage, [UPowerDeviceState.Charging, UPowerDeviceState.FullyCharged, UPowerDeviceState.PendingCharge].includes(UPower.displayDevice.state))
-        color: !UPower.onBattery || UPower.displayDevice.percentage > 0.2 ? Colours.palette.m3onSurface : Colours.palette.m3error
+        color: UPower.displayDevice.percentage <= 0.2 && UPower.onBattery ? Colours.palette.m3error : DarkAccent.accent
     }
 }
