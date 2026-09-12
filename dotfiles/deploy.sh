@@ -9,12 +9,13 @@ cp -rv "$here/.config/." "$HOME/.config/"
 cp -rv "$here/.local/."  "$HOME/.local/"
 
 echo "==> wallpaper"
-cp -v "$here/wallpaper.jpg" "$HOME/wallhaven-vpyekp.jpg"
+mkdir -p "$HOME/Pictures"
+cp -v "$here/wallpaper.png" "$HOME/Pictures/wallhaven-p838q3.png"
 mkdir -p "$HOME/.local/state/caelestia/wallpaper"
 # Point the shell's background at it WITHOUT running `caelestia wallpaper`,
 # which would regenerate scheme.json from the image and clobber the custom
 # black + dark-blue palette shipped in .local/state/caelestia/scheme.json.
-printf '%s' "$HOME/wallhaven-vpyekp.jpg" > "$HOME/.local/state/caelestia/wallpaper/path.txt"
+printf '%s' "$HOME/Pictures/wallhaven-p838q3.png" > "$HOME/.local/state/caelestia/wallpaper/path.txt"
 
 chmod +x "$HOME/.config/hypr/scripts/close-workspace.sh" 2>/dev/null || true
 
