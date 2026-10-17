@@ -34,3 +34,6 @@ Run `./deploy.sh` after cloning to copy everything into place.
 
 The caelestia shell (see `../finish-install.sh`) plus: `hyprland`, `kitty`,
 `albert`/`albert-bin`, `playerctl`, `brightnessctl`.
+
+For Japanese input: `fcitx5`, `fcitx5-mozc`, `fcitx5-gtk`, `fcitx5-qt`
+(`sudo pacman -S --needed fcitx5 fcitx5-mozc fcitx5-gtk fcitx5-qt`).
