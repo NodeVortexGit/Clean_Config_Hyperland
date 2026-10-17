@@ -17,7 +17,7 @@ mkdir -p "$HOME/.local/state/caelestia/wallpaper"
 # black + dark-blue palette shipped in .local/state/caelestia/scheme.json.
 printf '%s' "$HOME/Pictures/wallhaven-p838q3.png" > "$HOME/.local/state/caelestia/wallpaper/path.txt"
 
-chmod +x "$HOME/.config/hypr/scripts/close-workspace.sh" 2>/dev/null || true
+chmod +x "$HOME"/.config/hypr/scripts/*.sh 2>/dev/null || true
 
 echo
 echo "Done. Log into Hyprland (SDDM -> Hyprland), or if already in it:"
